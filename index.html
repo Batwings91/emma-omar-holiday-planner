@@ -65,7 +65,9 @@
   .cal-day-label { font-size: 9px; font-weight: 700; color: #AAA; text-align: center; padding: 2px 0; }
   .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
   .cal-day { font-size: 10px; text-align: center; padding: 4px 1px; border-radius: 3px; cursor: default; min-height: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .cal-day .cal-who { font-size: 7px; font-weight: 800; letter-spacing: 0.3px; line-height: 1; margin-top: 1px; }
+  .cal-day .cal-who { font-size: 8px; font-weight: 800; line-height: 1; margin-top: 1px; }
+  .cal-day .cal-evt { width: 4px; height: 4px; border-radius: 50%; background: #9B59B6; position: absolute; top: 2px; right: 2px; }
+  .cal-day { position: relative; }
   .cal-day.empty { }
   .cal-day.term { background: #F5F5F5; color: #999; }
   .cal-day.holiday { background: #FFF2CC; color: #7F5F00; }
@@ -111,6 +113,7 @@
   .accept-btn { margin-top: 10px; padding: 7px 18px; border-radius: 8px; font-size: 12px; font-weight: 700; background: #4472C4; color: #fff; border: none; cursor: pointer; }
   .chevron { font-size: 15px; color: #CCC; transition: transform 0.2s; display: inline-block; }
   .chevron.open { transform: rotate(180deg); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
   @media (max-width: 500px) { .banner { font-size: 11px; } .splits { flex-direction: column; } }
 </style>
 </head>
@@ -176,9 +179,9 @@ function fbListen(path, cb) {
 // DATA
 // ══════════════════════════════════════════════════
 const HOLIDAYS = [
-  { id:"xmas25",year:"2025/26",name:"Christmas 2025",schoolHol:"Mon 22 Dec – Fri 2 Jan",termEnds:"Fri 19 Dec 1.10pm",schoolResumes:"Mon 5 Jan",availStart:"2025-12-19",availEnd:"2026-01-04",totalNights:16,keyDates:"Christmas Day 25 Dec",locked:true,agreed:{omar:5,emma:11,source:"Mediation OS JS2",omarDates:"Mon 22 Dec 6pm → Sat 27 Dec 11:30am",emmaDates:"Fri 19 Dec 1.10pm → Mon 22 Dec 6pm + Sat 27 Dec → Sun 4 Jan",notes:""}},
-  { id:"febht26",year:"2025/26",name:"Feb Half Term 2026",schoolHol:"Mon 16 – Fri 20 Feb + Inset Fri 13",termEnds:"Thu 12 Feb (normal school day)",schoolResumes:"Mon 23 Feb",availStart:"2026-02-13",availEnd:"2026-02-22",totalNights:9,keyDates:"Inset Fri 13 Feb",locked:true,agreed:{omar:5,emma:4,source:"Agreed",omarDates:"Fri 13 Feb → Wed 18 Feb 6:45pm",emmaDates:"Wed 18 Feb 6:45pm → Sun 22 Feb",notes:""}},
-  { id:"easter26",year:"2025/26",name:"Easter 2026",schoolHol:"Mon 30 Mar – Fri 10 Apr",termEnds:"Fri 27 Mar 1.10pm",schoolResumes:"Mon 13 Apr",availStart:"2026-03-27",availEnd:"2026-04-12",totalNights:16,keyDates:"Good Fri 3 Apr · Easter Mon 6 Apr",locked:true,agreed:{omar:9,emma:7,source:"Agreed per email",omarDates:"Fri 27 Mar 1.10pm → Fri 3 Apr 11am + Fri 10 Apr 6pm → Sun 12 Apr",emmaDates:"Fri 3 Apr 11am → Fri 10 Apr 6pm",notes:"Emma: \"this is my year for Easter as you had Christmas.\""}},
+  { id:"xmas25",year:"2025/26",name:"Christmas 2025",schoolHol:"Mon 22 Dec – Fri 2 Jan",termEnds:"Fri 19 Dec 1.10pm",schoolResumes:"Mon 5 Jan",availStart:"2025-12-19",availEnd:"2026-01-04",totalNights:16,keyDates:"Christmas Day 25 Dec",locked:true,agreed:{omar:5,emma:11,source:"Mediation OS JS2",omarDates:"Mon 22 Dec 6pm → Sat 27 Dec 11:30am",emmaDates:"Fri 19 Dec 1.10pm → Mon 22 Dec 6pm + Sat 27 Dec → Sun 4 Jan",notes:""},dateRanges:[{s:"2025-12-19",e:"2025-12-21",w:"emma"},{s:"2025-12-22",e:"2025-12-26",w:"omar"},{s:"2025-12-27",e:"2026-01-04",w:"emma"}]},
+  { id:"febht26",year:"2025/26",name:"Feb Half Term 2026",schoolHol:"Mon 16 – Fri 20 Feb + Inset Fri 13",termEnds:"Thu 12 Feb (normal school day)",schoolResumes:"Mon 23 Feb",availStart:"2026-02-13",availEnd:"2026-02-22",totalNights:9,keyDates:"Inset Fri 13 Feb",locked:true,agreed:{omar:5,emma:4,source:"Agreed",omarDates:"Fri 13 Feb → Wed 18 Feb 6:45pm",emmaDates:"Wed 18 Feb 6:45pm → Sun 22 Feb",notes:""},dateRanges:[{s:"2026-02-13",e:"2026-02-17",w:"omar"},{s:"2026-02-18",e:"2026-02-22",w:"emma"}]},
+  { id:"easter26",year:"2025/26",name:"Easter 2026",schoolHol:"Mon 30 Mar – Fri 10 Apr",termEnds:"Fri 27 Mar 1.10pm",schoolResumes:"Mon 13 Apr",availStart:"2026-03-27",availEnd:"2026-04-12",totalNights:16,keyDates:"Good Fri 3 Apr · Easter Mon 6 Apr",locked:true,agreed:{omar:9,emma:7,source:"Agreed per email",omarDates:"Fri 27 Mar 1.10pm → Fri 3 Apr 11am + Fri 10 Apr 6pm → Sun 12 Apr",emmaDates:"Fri 3 Apr 11am → Fri 10 Apr 6pm",notes:"Emma: \"this is my year for Easter as you had Christmas.\""},dateRanges:[{s:"2026-03-27",e:"2026-04-02",w:"omar"},{s:"2026-04-03",e:"2026-04-09",w:"emma"},{s:"2026-04-10",e:"2026-04-12",w:"omar"}]},
   { id:"maybh26",year:"2025/26",name:"May Bank Holiday Weekend 2026",schoolHol:"Mon 4 May (Bank Holiday)",termEnds:"Fri 1 May (normal school day)",schoolResumes:"Tue 5 May",availStart:"2026-05-01",availEnd:"2026-05-04",totalNights:3,keyDates:"Bank Holiday Mon 4 May"},
   { id:"mayht26",year:"2025/26",name:"May Half Term 2026",schoolHol:"Mon 25 – Fri 29 May",termEnds:"Fri 22 May (normal school day)",schoolResumes:"Mon 1 Jun",availStart:"2026-05-22",availEnd:"2026-05-31",totalNights:9,keyDates:""},
   { id:"summer26",year:"2025/26",name:"Summer 2026",schoolHol:"From Mon 20 Jul (inset Mon–Wed)",termEnds:"Fri 17 Jul 1.10pm",schoolResumes:"~Sep 2026",availStart:"2026-07-17",availEnd:"2026-08-31",totalNights:45,keyDates:"Omar 27 Jul – 9 Aug agreed",partialAgreed:{omar:13,note:"Omar 27 Jul – 9 Aug agreed. Remaining ~32 nights to discuss.",omarDates:"Mon 27 Jul → Sat 9 Aug"}},
@@ -401,6 +404,7 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
             {isNow&&!isNext && <span className="badge" style={{background:"#70AD47",color:"#fff"}}>NOW</span>}
             <span style={{fontWeight:700,fontSize:14}}>{holiday.name}</span>
             <span className="badge" style={{background:sb,color:sc2}}>{st}</span>
+            {otherP&&!myP&&!hasAgr&&!locked && <span className="badge" style={{background:"#C00",color:"#fff",animation:"pulse 2s infinite"}}>REVIEW</span>}
           </div>
           <div style={{fontSize:11,color:"#AAA",marginTop:2}}>
             School hol: {holiday.schoolHol} · Available: {fmtMed(holiday.availStart)} PM → {fmtMed(holiday.availEnd)} · <strong style={{color:"#777"}}>{holiday.totalNights}n</strong>
@@ -470,9 +474,10 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
         </div>}
 
         {!locked&&!(data&&data.agreement)&&drafting && <div className="draft-box">
-          <div style={{fontSize:11,fontWeight:700,color:"#1F4E79",marginBottom:12,textTransform:"uppercase"}}>
+          <div style={{fontSize:11,fontWeight:700,color:"#1F4E79",marginBottom:4,textTransform:"uppercase"}}>
             {myP?"Update "+nm(me)+"'s proposal":otherP?nm(me)+"'s counter-proposal":nm(me)+"'s proposal"}
           </div>
+          <div style={{fontSize:10,color:"#888",marginBottom:10}}>Propose the full split — set dates for both Omar and Emma.</div>
           <div style={{fontSize:10,fontWeight:700,color:"#1F4E79",marginBottom:4}}>OMAR'S TIME</div>
           <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",marginBottom:6}}>
             <label style={{fontSize:10,color:"#888"}}>From</label>
@@ -604,6 +609,7 @@ function TermDatesPanel({termDates, onTermUpdate, me}) {
           React.createElement("option",{value:"2026/27"},"2026/27")
         )
       ),
+      (draft.end && draft.end < TODAY) && React.createElement("div", {style:{padding:"5px 8px",borderRadius:6,background:"#FFF2CC",border:"1px solid #E8C84A",fontSize:10,color:"#7F5F00",marginBottom:6}}, "\u26a0\ufe0f Note: this date has already passed."),
       React.createElement("div", {style:{display:"flex",gap:6}},
         React.createElement("button", {onClick:onSave, style:{padding:"5px 14px",borderRadius:6,fontSize:11,fontWeight:700,background:"#4472C4",color:"#fff",border:"none",cursor:"pointer"}}, "Save"),
         React.createElement("button", {onClick:onCancel, style:{padding:"5px 10px",borderRadius:6,fontSize:11,background:"#fff",border:"1px solid #DDD",cursor:"pointer",color:"#888"}}, "Cancel")
@@ -670,6 +676,15 @@ function CalendarView({allData, selectedHoliday}) {
         var d = allData[h.id];
         var agr = (d && d.agreement) || h.agreed;
         if (agr) {
+          // Use explicit dateRanges if available (for accurate non-contiguous splits)
+          if (h.dateRanges) {
+            for (var r = 0; r < h.dateRanges.length; r++) {
+              if (dateStr >= h.dateRanges[r].s && dateStr <= h.dateRanges[r].e) {
+                return {type: h.dateRanges[r].w, tooltip: (h.dateRanges[r].w==="omar"?"Omar's time":"Emma's time") + " — " + h.name, holidayId: h.id};
+              }
+            }
+          }
+          // Fallback: proportional split (first N days Omar, rest Emma)
           var dayIndex = Math.ceil((new Date(dateStr+"T12:00:00") - new Date(h.availStart+"T12:00:00")) / 86400000);
           var totalDays = Math.ceil((new Date(h.availEnd+"T12:00:00") - new Date(h.availStart+"T12:00:00")) / 86400000) + 1;
           var omarDays = Math.round((agr.omar / (agr.omar + agr.emma)) * totalDays);
@@ -693,9 +708,18 @@ function CalendarView({allData, selectedHoliday}) {
     // Check alternating weekends during term time
     var wkPar = getWeekendParent(dateStr);
     if (wkPar) {
-      return {type: wkPar+"-wknd", tooltip: (wkPar==="omar"?"Omar":"Emma") + "'s weekend", holidayId: null};
+      // Also check for school events on this weekend day
+      var evtName = null;
+      for (var k = 0; k < TERM_DATES.length; k++) {
+        if (TERM_DATES[k].type === "event" && dateStr >= TERM_DATES[k].start && dateStr <= TERM_DATES[k].end) {
+          evtName = TERM_DATES[k].period.replace(/^[^\s\w]*/,""); break;
+        }
+      }
+      var tt = (wkPar==="omar"?"Omar":"Emma") + "'s weekend";
+      if (evtName) tt += " + " + evtName;
+      return {type: wkPar+"-wknd", tooltip: tt, holidayId: null, hasEvent: !!evtName};
     }
-    return {type:"term", tooltip:"Term time", holidayId: null};
+    return {type:"term", tooltip:"Term time", holidayId: null, hasEvent: false};
   }
 
   // Selected holiday range
@@ -734,10 +758,11 @@ function CalendarView({allData, selectedHoliday}) {
       var isDimmed = selectedHoliday && !(ds >= selStart && ds <= selEnd);
       var cls = "cal-day " + info.type + (isToday ? " today" : "") + (isDimmed ? " dimmed" : "");
       var whoLabel = null;
-      if (info.type === "omar" || info.type === "omar-wknd") whoLabel = "Omar";
-      else if (info.type === "emma" || info.type === "emma-wknd") whoLabel = "Emma";
+      if (info.type === "omar" || info.type === "omar-wknd") whoLabel = "O";
+      else if (info.type === "emma" || info.type === "emma-wknd") whoLabel = "E";
       var cellContent = [d];
       if (whoLabel) cellContent.push(React.createElement("span", {key:"w", className:"cal-who"}, whoLabel));
+      if (info.hasEvent) cellContent.push(React.createElement("span", {key:"ev", className:"cal-evt"}));
       cells.push(React.createElement("div", {key:d, className:cls, title:info.tooltip}, cellContent));
     }
     return React.createElement("div", {key:monthName, className:"cal-month"+(isSelectedMonth?" selected":"")},
