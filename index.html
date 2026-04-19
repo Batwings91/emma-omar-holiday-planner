@@ -405,7 +405,6 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
             {isNow&&!isNext && <span className="badge" style={{background:"#70AD47",color:"#fff"}}>NOW</span>}
             <span style={{fontWeight:700,fontSize:14}}>{holiday.name}</span>
             <span className="badge" style={{background:sb,color:sc2}}>{st}</span>
-            {otherP&&!myP&&!hasAgr&&!locked && <span className="badge" style={{background:"#C00",color:"#fff",animation:"pulse 2s infinite"}}>REVIEW</span>}
           </div>
           <div style={{fontSize:11,color:"#AAA",marginTop:2}}>
             School hol: {holiday.schoolHol} · Available: {fmtMed(holiday.availStart)} PM → {fmtMed(holiday.availEnd)} · <strong style={{color:"#777"}}>{holiday.totalNights}n</strong>
@@ -418,8 +417,13 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
           {alloc>0 && <div style={{display:"flex",alignItems:"center",gap:5}}>
-            <span style={{fontSize:16,fontWeight:800,color:"#4A8C62"}}>{eo}</span><span style={{color:"#DDD",fontSize:12}}>:</span><span style={{fontSize:16,fontWeight:800,color:"#C67A3C"}}>{ee}</span>
+            <div style={{display:"flex",alignItems:"center",gap:3}}>
+              <div style={{textAlign:"center"}}><div style={{fontSize:8,fontWeight:700,color:"#4A8C62"}}>O</div><div style={{fontSize:16,fontWeight:800,color:"#4A8C62"}}>{eo}</div></div>
+              <span style={{color:"#DDD",fontSize:12}}>:</span>
+              <div style={{textAlign:"center"}}><div style={{fontSize:8,fontWeight:700,color:"#C67A3C"}}>E</div><div style={{fontSize:16,fontWeight:800,color:"#C67A3C"}}>{ee}</div></div>
+            </div>
           </div>}
+          {otherP&&!myP&&!hasAgr&&!locked && <span className="badge" style={{background:"#C00",color:"#fff",animation:"pulse 2s infinite",fontSize:8,padding:"2px 6px"}}>REVIEW</span>}
           <span className={"chevron"+(isOpen?" open":"")}>▾</span>
         </div>
       </div>
@@ -545,11 +549,26 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
   );
 }
 
-function TermDatesPanel({termDates, onTermUpdate, me}) {
+function TermDatesPanel({termDates, onTermUpdate, me, allData}) {
   var [editId, setEditId] = useState(null);
   var [draft, setDraft] = useState({});
   var [adding, setAdding] = useState(false);
   var years = ["2025/26","2026/27"];
+
+  function getHolidayAgreedStatus(termDate) {
+    if (termDate.type !== "holiday") return null;
+    // Find matching HOLIDAYS entry by date overlap
+    for (var i = 0; i < HOLIDAYS.length; i++) {
+      var h = HOLIDAYS[i];
+      if (termDate.start >= h.availStart && termDate.start <= h.availEnd || termDate.end >= h.availStart && termDate.end <= h.availEnd || h.availStart >= termDate.start && h.availStart <= termDate.end) {
+        var d = allData && allData[h.id];
+        var agr = (d && d.agreement) || h.agreed;
+        if (agr) return {agreed: true, name: h.name};
+        return {agreed: false, name: h.name};
+      }
+    }
+    return {agreed: false, name: ""};
+  }
 
   function findNextDate() {
     // Find the entry whose start date is next (strictly in the future)
@@ -638,6 +657,14 @@ function TermDatesPanel({termDates, onTermUpdate, me}) {
     React.createElement("p", {style:{fontSize:11,color:"#AAA",margin:"0 0 2px"}}, "Official school calendar dates. Verified from school documents only."),
     React.createElement("p", {style:{fontSize:10,color:"#4472C4",margin:"0 0 10px",fontStyle:"italic"}}, "Sources: Dates for Diaries Keston 2025-2026 V4 \u00b7 Term Dates 2025-2026 \u00b7 Revised Term Dates 2026-2027 (Mrs Ardern, 9 Feb 2026)"),
     React.createElement("p", {style:{fontSize:10,color:"#888",margin:"0 0 10px"}}, "\u26a0\ufe0f Flag a date if incorrect \u00b7 Click to edit \u00b7 Changes are shared and tracked."),
+    React.createElement("div", {style:{display:"flex",gap:8,flexWrap:"wrap",marginBottom:10}},
+      [{c:"#FFF2CC",b:"#E8C84A",l:"Holiday"},{c:"#fff",b:"#E8E8E8",l:"Term"},{c:"#E2EFDA",b:"#A3C985",l:"Inset"},{c:"#F0E6FF",b:"#C4A8E0",l:"School event"}].map(function(item){
+        return React.createElement("div",{key:item.l,style:{display:"flex",alignItems:"center",gap:4,fontSize:10,color:"#666"}},
+          React.createElement("div",{style:{width:12,height:12,borderRadius:3,background:item.c,border:"1px solid "+item.b}}),
+          item.l
+        );
+      })
+    ),
     !adding && React.createElement("button", {onClick:function(){setAdding(true);setDraft({year:"2025/26",type:"event",start:"",end:"",period:""});}, style:{marginBottom:12,padding:"7px 16px",borderRadius:8,fontSize:12,fontWeight:700,background:"#4472C4",color:"#fff",border:"none",cursor:"pointer"}}, "+ Add a date or event"),
     adding && renderEditForm(addNew, function(){setAdding(false);setDraft({});}),
     years.map(function(y){
@@ -646,6 +673,7 @@ function TermDatesPanel({termDates, onTermUpdate, me}) {
         termDates.filter(function(t){return t.year===y;}).sort(function(a,b){return a.start<b.start?-1:1;}).map(function(t){
           var isPast = t.end < TODAY;
           var isNext = t.id === nextId;
+          var holStatus = getHolidayAgreedStatus(t);
           if (editId === t.id) return React.createElement("div",{key:t.id}, renderEditForm(saveEdit, function(){setEditId(null);}));
           var tc2 = {holiday:"#FFF2CC",term:"#fff",inset:"#E2EFDA",event:"#F0E6FF"};
           var tb3 = {holiday:"#E8C84A",term:"#E8E8E8",inset:"#A3C985",event:"#C4A8E0"};
@@ -653,6 +681,7 @@ function TermDatesPanel({termDates, onTermUpdate, me}) {
             isNext && React.createElement("span", {style:{fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:"#4472C4",color:"#fff",marginRight:4}}, "NEXT"),
             React.createElement("span", {onClick:function(){setEditId(t.id);setDraft(Object.assign({},t));}, style:{fontSize:11,fontWeight:t.type==="holiday"?700:400,flex:"1 1 120px",cursor:"pointer",minWidth:0}}, t.period),
             React.createElement("span", {style:{fontSize:10,color:"#888",whiteSpace:"nowrap"}}, fmtShort(t.start) + (t.end&&t.end!==t.start?" \u2192 "+fmtShort(t.end):"")),
+            holStatus && React.createElement("span", {style:{fontSize:9,fontWeight:600,marginLeft:4,padding:"1px 5px",borderRadius:4,background:holStatus.agreed?"#C6EFCE":"#FCE4D6",color:holStatus.agreed?"#375623":"#C00"}}, holStatus.agreed?"\u2713 Split agreed":"\u2717 Split not agreed"),
             t.flag && React.createElement("span", {style:{fontSize:9,color:"#C00",fontWeight:600,marginLeft:4}}, "\u26a0\ufe0f " + t.flag + " (" + (t.flaggedBy||"") + ")"),
             t.flag && React.createElement("button", {onClick:function(){clearFlag(t.id);}, style:{fontSize:9,color:"#70AD47",background:"none",border:"none",cursor:"pointer",fontWeight:600}}, "\u2713 Resolve"),
             t.lastModifiedBy && React.createElement("span", {style:{fontSize:8,color:"#BBB",marginLeft:4}}, "edited " + (t.lastModifiedBy||"")),
@@ -1003,7 +1032,7 @@ function App() {
         </div>}
 
         {/* Term Dates tab */}
-        {tab==="termdates" && <TermDatesPanel termDates={termDates} onTermUpdate={handleTermUpdate} me={me} />}
+        {tab==="termdates" && <TermDatesPanel termDates={termDates} onTermUpdate={handleTermUpdate} me={me} allData={allData} />}
 
         <div style={{marginTop:20,textAlign:"center",fontSize:10,color:"#CCC",lineHeight:1.6}}>
           <p>Term dates verified from Keston CE Primary school documents only.</p>
