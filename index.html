@@ -365,8 +365,9 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
   var matched = myP&&otherP&&myP.omar===otherP.omar&&myP.emma===otherP.emma;
   var hasAgr = !!agr||!!(data&&data.agreement)||!!matched;
   var st = hasAgr?"Agreed":(myP&&otherP)?"Both proposed":myP?nm(me)+"'s proposal":otherP?nm(other)+"'s proposal":partial?"Partial":"Open";
-  var sc2 = hasAgr?"#4472C4":(myP&&otherP)?"#ED7D31":(myP||otherP)?"#70AD47":partial?"#ED7D31":"#CCC";
-  var sb = hasAgr?"#DDEBF7":(myP&&otherP)?"#FFF2CC":(myP||otherP)?"#E2EFDA":partial?"#FFF2CC":"#F5F5F5";
+  var proposer = myP && !otherP ? me : otherP && !myP ? other : null;
+  var sc2 = hasAgr?"#4472C4":(myP&&otherP)?"#ED7D31":proposer?(proposer==="omar"?"#4A8C62":"#E8890C"):partial?"#ED7D31":"#CCC";
+  var sb = hasAgr?"#DDEBF7":(myP&&otherP)?"#FFF2CC":proposer?(proposer==="omar"?"#F0FAF3":"#FFF4EC"):partial?"#FFF2CC":"#F5F5F5";
   var du = daysUntil(holiday.availStart); var duEnd = daysUntil(holiday.availEnd);
   var isPast = duEnd<0; var isNow = du<=0&&duEnd>=0;
 
@@ -416,7 +417,7 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
           </div>}
         </div>
         <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
-          {otherP&&!myP&&!hasAgr&&!locked && <span className="badge" style={{background:"#C00",color:"#fff",animation:"pulse 2s infinite",fontSize:8,padding:"2px 6px"}}>REVIEW</span>}
+          {(otherP||myP)&&!hasAgr&&!locked && <span className="badge" style={{background:"#C00",color:"#fff",animation:"pulse 2s infinite",fontSize:8,padding:"2px 6px"}}>REVIEW</span>}
           {alloc>0 && <div style={{display:"flex",alignItems:"center",gap:3,minWidth:52,justifyContent:"center"}}>
             <div style={{textAlign:"center"}}><div style={{fontSize:8,fontWeight:700,color:"#4A8C62"}}>O</div><div style={{fontSize:16,fontWeight:800,color:"#4A8C62"}}>{eo}</div></div>
             <span style={{color:"#DDD",fontSize:12}}>:</span>
@@ -1041,13 +1042,13 @@ function App() {
 
         {/* Regular weekly pattern note */}
         {tab!=="termdates" && <div style={{fontSize:9,color:"#1F4E79",padding:"5px 10px",borderRadius:6,background:"#DDEBF7",marginBottom:10,lineHeight:1.5}}>
-          <strong>Regular weekly pattern (term time):</strong> Mon/Tue/Thu nights = Emma \u00b7 Wed night = Omar \u00b7 Alternating weekends Fri 6pm\u2013Sun 6pm. This applies at holiday boundaries \u2014 e.g. Thu night at start of a holiday = Emma, Sun night at end = Emma.
+          <strong>Regular weekly pattern (term time):</strong> Mon/Tue/Thu nights = Emma · Wed night = Omar · Alternating weekends Fri 6pm–Sun 6pm. This applies at holiday boundaries — e.g. Thu night at start of a holiday = Emma, Sun night at end = Emma.
         </div>}
 
         {/* Split summary */}
         {tab!=="termdates" && <div className="splits">
-          <SplitBox label={"Agreed split"+(filter!=="all"?" — "+filter:"")} tO={agreed.tO} tE={agreed.tE} tA={agreed.tA} unal={agreed.unal} color="#4472C4" />
-          <SplitBox label={"If all proposals accepted"+(filter!=="all"?" — "+filter:"")} tO={proposed.tO} tE={proposed.tE} tA={proposed.tA} unal={proposed.unal} color="#70AD47" />
+          <SplitBox label={"Agreed holiday split"+(filter!=="all"?" — "+filter:"")} tO={agreed.tO} tE={agreed.tE} tA={agreed.tA} unal={agreed.unal} color="#4472C4" />
+          <SplitBox label={"If all holiday proposals accepted"+(filter!=="all"?" — "+filter:"")} tO={proposed.tO} tE={proposed.tE} tA={proposed.tA} unal={proposed.unal} color="#70AD47" />
         </div>}
 
         {/* Desktop: side-by-side calendar + holidays */}
