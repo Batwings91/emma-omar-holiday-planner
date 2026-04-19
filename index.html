@@ -298,7 +298,7 @@ function ProposalBox({who,proposal,isMe,onAgree,onDelete}) {
     <div className={"proposal-box "+who}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
         <div style={{display:"flex",alignItems:"center",gap:6}}>
-          <span style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.8px",padding:"2px 8px",borderRadius:6,background:who==="omar"?"#C6EFCE":"#FCE4D6",color:who==="omar"?"#4A8C62":"#C67A3C"}}>{nm(who)}'s proposal</span>
+          <span style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.8px",padding:"3px 10px",borderRadius:6,background:who==="omar"?"#4A8C62":"#E8890C",color:"#fff"}}>{nm(who)}'s proposal</span>
           {when && <span style={{fontSize:10,color:"#BBB"}}>{when}</span>}
         </div>
         {isMe && onDelete && <button className="withdraw-btn" onClick={onDelete}>✕ Withdraw</button>}
@@ -331,24 +331,20 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
   var [dN,setDN] = useState("");
   var [dOStart,setDOStart] = useState(""); var [dOStartT,setDOStartT] = useState("18:00");
   var [dOEnd,setDOEnd] = useState(""); var [dOEndT,setDOEndT] = useState("18:00");
+  var [dEStart,setDEStart] = useState(""); var [dEStartT,setDEStartT] = useState("18:00");
+  var [dEEnd,setDEEnd] = useState(""); var [dEEndT,setDEEndT] = useState("18:00");
 
   function calcNights(startD, endD) {
     if (!startD || !endD) return 0;
     var s = new Date(startD+"T12:00:00"); var e = new Date(endD+"T12:00:00");
     return Math.max(0, Math.round((e - s) / 86400000));
   }
-  function updateFromDates(ms, me2) {
-    var myN = calcNights(ms, me2);
-    var otherN = holiday.totalNights - myN;
-    var myDates = ms && me2 ? fmtMed(ms) + " " + timeLabel(dOStartT) + " \u2192 " + fmtMed(me2) + " " + timeLabel(dOEndT) : "";
-    var otherDates = ms && me2 ? fmtMed(holiday.availStart) + " \u2192 " + fmtMed(ms) + " + " + fmtMed(me2) + " \u2192 " + fmtMed(holiday.availEnd) : "";
-    if (me === "omar") {
-      setDO(String(myN)); setDE(String(otherN));
-      setDOD(myDates); setDED(otherDates);
-    } else {
-      setDE(String(myN)); setDO(String(otherN));
-      setDED(myDates); setDOD(otherDates);
-    }
+  function updateNights() {
+    var oN = calcNights(dOStart, dOEnd);
+    var eN = calcNights(dEStart, dEEnd);
+    setDO(String(oN)); setDE(String(eN));
+    setDOD(dOStart && dOEnd ? fmtMed(dOStart) + " " + timeLabel(dOStartT) + " \u2192 " + fmtMed(dOEnd) + " " + timeLabel(dOEndT) : "");
+    setDED(dEStart && dEEnd ? fmtMed(dEStart) + " " + timeLabel(dEStartT) + " \u2192 " + fmtMed(dEEnd) + " " + timeLabel(dEEndT) : "");
   }
   function timeLabel(t) {
     if (!t) return "";
@@ -356,8 +352,6 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
     var ampm = h >= 12 ? "pm" : "am"; if (h > 12) h -= 12; if (h === 0) h = 12;
     return h + (m !== "00" ? ":" + m : "") + ampm;
   }
-  function handleOStartChange(v) { setDOStart(v); updateFromDates(v, dOEnd); }
-  function handleOEndChange(v) { setDOEnd(v); updateFromDates(dOStart, v); }
 
   var other = me==="omar"?"emma":"omar";
   var myP = data&&data.proposals&&data.proposals[me] ? data.proposals[me] : null;
@@ -511,44 +505,45 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
               <button className="btn" onClick={function(){setDrafting(false);}}>Cancel</button>
             </div>
           </div> : <div>
-            <div style={{fontSize:10,color:"#888",marginBottom:6}}>Propose the full split — set dates for both Omar and Emma.</div>
-            <div style={{fontSize:9,color:"#4472C4",marginBottom:10,padding:"4px 8px",borderRadius:6,background:"#DDEBF7"}}>Regular pattern: Mon/Tue/Thu nights = Emma · Wed night = Omar · Alternating weekends (Fri 6pm–Sun 6pm). Applies at holiday boundaries.</div>
-            <div style={{fontSize:10,fontWeight:700,color:"#1F4E79",marginBottom:4}}>{nm(me).toUpperCase()+"'S DATES"}</div>
-            <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",marginBottom:6}}>
-              <label style={{fontSize:10,color:"#888"}}>From</label>
-              <input type="date" value={dOStart} min={holiday.availStart} max={holiday.availEnd} onChange={function(e){handleOStartChange(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid "+(me==="omar"?"#6BAF82":"#E8A667"),fontSize:11,fontFamily:"inherit"}} />
-              <select value={dOStartT} onChange={function(e){setDOStartT(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid "+(me==="omar"?"#6BAF82":"#E8A667"),fontSize:11,fontFamily:"inherit"}}>
-                <option value="08:00">8am</option><option value="09:00">9am</option><option value="10:00">10am</option><option value="11:00">11am</option><option value="11:30">11:30am</option>
-                <option value="12:00">12pm</option><option value="13:10">1:10pm</option><option value="14:00">2pm</option><option value="15:00">3pm</option><option value="15:20">3:20pm</option>
-                <option value="16:00">4pm</option><option value="17:00">5pm</option><option value="18:00">6pm</option><option value="18:45">6:45pm</option><option value="19:00">7pm</option>
-              </select>
-              <label style={{fontSize:10,color:"#888"}}>To</label>
-              <input type="date" value={dOEnd} min={holiday.availStart} max={holiday.availEnd} onChange={function(e){handleOEndChange(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid "+(me==="omar"?"#6BAF82":"#E8A667"),fontSize:11,fontFamily:"inherit"}} />
-              <select value={dOEndT} onChange={function(e){setDOEndT(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid "+(me==="omar"?"#6BAF82":"#E8A667"),fontSize:11,fontFamily:"inherit"}}>
-                <option value="08:00">8am</option><option value="09:00">9am</option><option value="10:00">10am</option><option value="11:00">11am</option><option value="11:30">11:30am</option>
-                <option value="12:00">12pm</option><option value="13:10">1:10pm</option><option value="14:00">2pm</option><option value="15:00">3pm</option><option value="15:20">3:20pm</option>
-                <option value="16:00">4pm</option><option value="17:00">5pm</option><option value="18:00">6pm</option><option value="18:45">6:45pm</option><option value="19:00">7pm</option>
-              </select>
+            <div style={{fontSize:10,color:"#888",marginBottom:6}}>Set dates for both Omar and Emma.</div>
+            <div style={{fontSize:9,color:"#4472C4",marginBottom:10,padding:"4px 8px",borderRadius:6,background:"#DDEBF7"}}>Regular pattern applies at boundaries: Mon/Tue/Thu nights = Emma · Wed night = Omar · Sun 6pm handover → Emma.</div>
+
+            <div style={{padding:"8px 10px",borderRadius:8,background:"#F0FAF3",border:"1px solid #C6EFCE",marginBottom:8}}>
+              <div style={{fontSize:10,fontWeight:700,color:"#4A8C62",marginBottom:4}}>OMAR'S DATES</div>
+              <div style={{display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
+                <input type="date" value={dOStart} min={holiday.availStart} max={holiday.availEnd} onChange={function(e){setDOStart(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1px solid #6BAF82",fontSize:11,fontFamily:"inherit"}} />
+                <select value={dOStartT} onChange={function(e){setDOStartT(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1px solid #6BAF82",fontSize:11,fontFamily:"inherit"}}>
+                  <option value="08:00">8am</option><option value="11:00">11am</option><option value="13:10">1.10pm</option><option value="15:20">3.20pm</option><option value="18:00">6pm</option><option value="18:45">6.45pm</option>
+                </select>
+                <span style={{color:"#AAA",fontSize:10}}>\u2192</span>
+                <input type="date" value={dOEnd} min={holiday.availStart} max={holiday.availEnd} onChange={function(e){setDOEnd(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1px solid #6BAF82",fontSize:11,fontFamily:"inherit"}} />
+                <select value={dOEndT} onChange={function(e){setDOEndT(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1px solid #6BAF82",fontSize:11,fontFamily:"inherit"}}>
+                  <option value="08:00">8am</option><option value="11:00">11am</option><option value="13:10">1.10pm</option><option value="15:20">3.20pm</option><option value="18:00">6pm</option><option value="18:45">6.45pm</option>
+                </select>
+              </div>
             </div>
-            <div style={{display:"flex",gap:14,alignItems:"center",marginBottom:10,padding:"6px 10px",borderRadius:8,background:"#F0FAF3",border:"1px solid #C6EFCE"}}>
-              <div style={{textAlign:"center"}}><div style={{fontSize:18,fontWeight:800,color:"#4A8C62"}}>{dO||"—"}</div><div style={{fontSize:8,color:"#4A8C62"}}>OMAR NIGHTS</div></div>
-              <div style={{textAlign:"center"}}><div style={{fontSize:18,fontWeight:800,color:"#C67A3C"}}>{dE||"—"}</div><div style={{fontSize:8,color:"#C67A3C"}}>EMMA NIGHTS</div></div>
+
+            <div style={{padding:"8px 10px",borderRadius:8,background:"#FEF6EF",border:"1px solid #FCE4D6",marginBottom:8}}>
+              <div style={{fontSize:10,fontWeight:700,color:"#C67A3C",marginBottom:4}}>EMMA'S DATES</div>
+              <div style={{display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
+                <input type="date" value={dEStart} min={holiday.availStart} max={holiday.availEnd} onChange={function(e){setDEStart(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1px solid #E8A667",fontSize:11,fontFamily:"inherit"}} />
+                <select value={dEStartT} onChange={function(e){setDEStartT(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1px solid #E8A667",fontSize:11,fontFamily:"inherit"}}>
+                  <option value="08:00">8am</option><option value="11:00">11am</option><option value="13:10">1.10pm</option><option value="15:20">3.20pm</option><option value="18:00">6pm</option><option value="18:45">6.45pm</option>
+                </select>
+                <span style={{color:"#AAA",fontSize:10}}>\u2192</span>
+                <input type="date" value={dEEnd} min={holiday.availStart} max={holiday.availEnd} onChange={function(e){setDEEnd(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1px solid #E8A667",fontSize:11,fontFamily:"inherit"}} />
+                <select value={dEEndT} onChange={function(e){setDEEndT(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1px solid #E8A667",fontSize:11,fontFamily:"inherit"}}>
+                  <option value="08:00">8am</option><option value="11:00">11am</option><option value="13:10">1.10pm</option><option value="15:20">3.20pm</option><option value="18:00">6pm</option><option value="18:45">6.45pm</option>
+                </select>
+              </div>
+            </div>
+
+            <button onClick={updateNights} className="btn" style={{marginBottom:8,fontSize:10}}>Calculate nights</button>
+
+            <div style={{display:"flex",gap:14,alignItems:"center",marginBottom:10,padding:"6px 10px",borderRadius:8,background:"#F8F9FB",border:"1px solid #E8E8E8"}}>
+              <div style={{textAlign:"center"}}><div style={{fontSize:18,fontWeight:800,color:"#4A8C62"}}>{dO||"\u2014"}</div><div style={{fontSize:8,color:"#4A8C62"}}>OMAR NIGHTS</div></div>
+              <div style={{textAlign:"center"}}><div style={{fontSize:18,fontWeight:800,color:"#C67A3C"}}>{dE||"\u2014"}</div><div style={{fontSize:8,color:"#C67A3C"}}>EMMA NIGHTS</div></div>
               <div style={{flex:1,fontSize:10,color:"#888"}}>of {holiday.totalNights} total</div>
-            </div>
-            {dOD && <div style={{fontSize:11,color:"#4A8C62",marginBottom:4}}><strong>Omar:</strong> {dOD}</div>}
-            {dED && <div style={{fontSize:11,color:"#C67A3C",marginBottom:8}}><strong>Emma:</strong> {dED}</div>}
-            <div style={{fontSize:10,color:"#999",marginBottom:4}}>Or enter dates manually:</div>
-            <div style={{marginBottom:6}}>
-              <input type="text" value={dOD} onChange={function(e){setDOD(e.target.value);}} placeholder="Omar's dates & handover" className="text-input omar" />
-            </div>
-            <div style={{marginBottom:6}}>
-              <input type="text" value={dED} onChange={function(e){setDED(e.target.value);}} placeholder="Emma's dates & handover" className="text-input emma" />
-            </div>
-            <div style={{display:"flex",gap:6,marginBottom:6}}>
-              <div><label style={{fontSize:10,fontWeight:700,color:"#4A8C62"}}>Omar nights</label>
-              <input type="number" min={0} max={holiday.totalNights} value={dO} onChange={function(e){setDO(e.target.value);setDE(String(holiday.totalNights-(parseInt(e.target.value)||0)));}} className="night-input omar" /></div>
-              <div><label style={{fontSize:10,fontWeight:700,color:"#C67A3C"}}>Emma nights</label>
-              <input type="number" min={0} max={holiday.totalNights} value={dE} onChange={function(e){setDE(e.target.value);setDO(String(holiday.totalNights-(parseInt(e.target.value)||0)));}} className="night-input emma" /></div>
             </div>
             <textarea value={dN} onChange={function(e){setDN(e.target.value);}} placeholder="Additional notes" className="text-input notes" />
             <div style={{display:"flex",gap:8,marginTop:10}}>
@@ -580,8 +575,10 @@ function TermDatesPanel({termDates, onTermUpdate, me, allData}) {
       if ((termDate.start >= h.availStart && termDate.start <= h.availEnd) || (termDate.end >= h.availStart && termDate.end <= h.availEnd) || (h.availStart >= termDate.start && h.availStart <= termDate.end)) {
         var d = allData && allData[h.id];
         var agr = (d && d.agreement) || h.agreed;
-        if (agr) return {agreed: true, name: h.name};
-        return {agreed: false, name: h.name};
+        if (agr) return {status: "agreed", name: h.name};
+        var hasProposal = d && d.proposals && (d.proposals.omar || d.proposals.emma);
+        if (hasProposal) return {status: "proposed", name: h.name};
+        return {status: "none", name: h.name};
       }
     }
     return null;
@@ -697,7 +694,7 @@ function TermDatesPanel({termDates, onTermUpdate, me, allData}) {
           return React.createElement("div", {key:t.id, style:{display:"flex",gap:4,padding:"6px 8px",marginBottom:2,borderRadius:6,background:tc2[t.type]||"#fff",border:"1px solid "+(tb3[t.type]||"#E8E8E8"),opacity:isPast?0.45:1,outline:isNext?"2px solid #4472C4":"none",outlineOffset:"-1px",alignItems:"center",flexWrap:"wrap"}},
             isNext && React.createElement("span", {style:{fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:"#4472C4",color:"#fff",marginRight:4}}, "NEXT"),
             React.createElement("span", {onClick:function(){setEditId(t.id);setDraft(Object.assign({},t));}, style:{fontSize:11,fontWeight:t.type==="holiday"?700:400,cursor:"pointer",minWidth:0}}, t.period),
-            holStatus && React.createElement("span", {style:{fontSize:9,fontWeight:600,marginLeft:2,padding:"1px 5px",borderRadius:4,background:holStatus.agreed?"#C6EFCE":"#FCE4D6",color:holStatus.agreed?"#375623":"#C00"}}, holStatus.agreed?"\u2713 Holiday split agreed":"\u2717 Holiday split not agreed"),
+            holStatus && React.createElement("span", {style:{fontSize:9,fontWeight:600,marginLeft:2,padding:"1px 5px",borderRadius:4,background:holStatus.status==="agreed"?"#C6EFCE":holStatus.status==="proposed"?"#FFF2CC":"#F5F5F5",color:holStatus.status==="agreed"?"#375623":holStatus.status==="proposed"?"#7F5F00":"#999"}}, holStatus.status==="agreed"?"\u2713 Holiday split agreed":holStatus.status==="proposed"?"\u25cb Holiday split proposed":"\u2717 Holiday split not proposed"),
             React.createElement("span", {style:{flex:1}}),
             React.createElement("span", {style:{fontSize:10,color:"#888",whiteSpace:"nowrap"}}, fmtShort(t.start) + (t.end&&t.end!==t.start?" \u2192 "+fmtShort(t.end):"")),
             t.flag && React.createElement("span", {style:{fontSize:9,color:"#C00",fontWeight:600,marginLeft:4}}, "\u26a0\ufe0f " + t.flag + " (" + (t.flaggedBy||"") + ")"),
@@ -1033,7 +1030,7 @@ function App() {
 
         {/* Regular weekly pattern note */}
         {tab!=="termdates" && <div style={{fontSize:9,color:"#1F4E79",padding:"5px 10px",borderRadius:6,background:"#DDEBF7",marginBottom:10,lineHeight:1.5}}>
-          <strong>Regular weekly pattern:</strong> Mon/Tue/Thu nights = Emma · Wed night = Omar · Alternating weekends Fri 6pm–Sun 6pm (Emma starts 17 Apr 2026). This applies at holiday boundaries — e.g. Thu night at start of a holiday = Emma, Sun night at end = Emma.
+          <strong>Regular weekly pattern (term time):</strong> Mon/Tue/Thu nights = Emma · Wed night = Omar · Alternating weekends Fri 6pm–Sun 6pm. <strong>Holiday splits below cover school holidays and bank holidays only.</strong> The regular pattern applies at holiday boundaries.
         </div>}
 
         {/* Split summary */}
