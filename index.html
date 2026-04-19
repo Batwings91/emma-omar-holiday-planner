@@ -78,6 +78,26 @@
   .cal-legend { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
   .cal-legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #666; }
   .cal-legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+  .desktop-main { display: flex; gap: 16px; align-items: flex-start; }
+  .desktop-left { flex: 1 1 340px; min-width: 280px; }
+  .desktop-right { flex: 1 1 400px; min-width: 300px; }
+  .mobile-tabs { display: none; }
+  .pdf-upload { margin-top: 14px; padding: 14px; border-radius: 10px; background: #FAFBFF; border: 1.5px dashed #4472C4; }
+  .pdf-upload input[type=file] { font-size: 12px; }
+  .pdf-output { margin-top: 10px; padding: 10px; border-radius: 8px; background: #fff; border: 1px solid #E8E8E8; font-size: 11px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; line-height: 1.6; color: #555; }
+  @media (max-width: 960px) {
+    .desktop-main { flex-direction: column; }
+    .desktop-left { display: none; }
+    .desktop-left.show-mobile { display: block; }
+    .desktop-right { display: none; }
+    .desktop-right.show-mobile { display: block; }
+    .mobile-tabs { display: flex; }
+    .hide-mobile { display: none; }
+  }
+  @media (min-width: 961px) {
+    .container { max-width: 1200px; }
+    .cal-grid { grid-template-columns: repeat(3, 1fr); }
+  }
   .landing { display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; padding: 20px; }
   .who-btn { width: 140px; padding: 22px 0; border-radius: 14px; cursor: pointer; font-size: 16px; font-weight: 700; }
   .who-btn.omar { border: 2px solid #6BAF82; background: #F0FAF3; color: #4A8C62; }
@@ -100,6 +120,9 @@
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<!-- PDF.js for text extraction -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";</script>
 
 <script type="text/babel">
 const { useState, useEffect, useCallback, useMemo, useRef } = React;
@@ -149,15 +172,15 @@ function fbListen(path, cb) {
 // ══════════════════════════════════════════════════
 const HOLIDAYS = [
   { id:"xmas25",year:"2025/26",name:"Christmas 2025",schoolHol:"Mon 22 Dec – Fri 2 Jan",termEnds:"Fri 19 Dec 1.10pm",schoolResumes:"Mon 5 Jan",availStart:"2025-12-19",availEnd:"2026-01-04",totalNights:16,keyDates:"Christmas Day 25 Dec",locked:true,agreed:{omar:5,emma:11,source:"Mediation OS JS2",omarDates:"Mon 22 Dec 6pm → Sat 27 Dec 11:30am",emmaDates:"Fri 19 Dec 1.10pm → Mon 22 Dec 6pm + Sat 27 Dec → Sun 4 Jan",notes:""}},
-  { id:"febht26",year:"2025/26",name:"Feb Half Term 2026",schoolHol:"Mon 16 – Fri 20 Feb + Inset Fri 13",termEnds:"Thu 12 Feb 3.20pm",schoolResumes:"Mon 23 Feb",availStart:"2026-02-13",availEnd:"2026-02-22",totalNights:9,keyDates:"Inset Fri 13 Feb",locked:true,agreed:{omar:5,emma:4,source:"Agreed",omarDates:"Fri 13 Feb → Wed 18 Feb 6:45pm",emmaDates:"Wed 18 Feb 6:45pm → Sun 22 Feb",notes:""}},
+  { id:"febht26",year:"2025/26",name:"Feb Half Term 2026",schoolHol:"Mon 16 – Fri 20 Feb + Inset Fri 13",termEnds:"Thu 12 Feb (normal school day)",schoolResumes:"Mon 23 Feb",availStart:"2026-02-13",availEnd:"2026-02-22",totalNights:9,keyDates:"Inset Fri 13 Feb",locked:true,agreed:{omar:5,emma:4,source:"Agreed",omarDates:"Fri 13 Feb → Wed 18 Feb 6:45pm",emmaDates:"Wed 18 Feb 6:45pm → Sun 22 Feb",notes:""}},
   { id:"easter26",year:"2025/26",name:"Easter 2026",schoolHol:"Mon 30 Mar – Fri 10 Apr",termEnds:"Fri 27 Mar 1.10pm",schoolResumes:"Mon 13 Apr",availStart:"2026-03-27",availEnd:"2026-04-12",totalNights:16,keyDates:"Good Fri 3 Apr · Easter Mon 6 Apr",locked:true,agreed:{omar:9,emma:7,source:"Agreed per email",omarDates:"Fri 27 Mar 1.10pm → Fri 3 Apr 11am + Fri 10 Apr 6pm → Sun 12 Apr",emmaDates:"Fri 3 Apr 11am → Fri 10 Apr 6pm",notes:"Emma: \"this is my year for Easter as you had Christmas.\""}},
-  { id:"mayht26",year:"2025/26",name:"May Half Term 2026",schoolHol:"Mon 25 – Fri 29 May",termEnds:"Fri 22 May 3.20pm",schoolResumes:"Mon 1 Jun",availStart:"2026-05-22",availEnd:"2026-05-31",totalNights:9,keyDates:""},
+  { id:"mayht26",year:"2025/26",name:"May Half Term 2026",schoolHol:"Mon 25 – Fri 29 May",termEnds:"Fri 22 May (normal school day)",schoolResumes:"Mon 1 Jun",availStart:"2026-05-22",availEnd:"2026-05-31",totalNights:9,keyDates:""},
   { id:"summer26",year:"2025/26",name:"Summer 2026",schoolHol:"From Mon 20 Jul (inset Mon–Wed)",termEnds:"Fri 17 Jul 1.10pm",schoolResumes:"~Sep 2026",availStart:"2026-07-17",availEnd:"2026-08-31",totalNights:45,keyDates:"Omar 27 Jul – 9 Aug agreed",partialAgreed:{omar:13,note:"Omar 27 Jul – 9 Aug agreed. Remaining ~32 nights to discuss.",omarDates:"Mon 27 Jul → Sat 9 Aug"}},
-  { id:"autht2627",year:"2026/27",name:"Autumn Half Term 2026",schoolHol:"Mon 19 Oct – Fri 30 Oct",termEnds:"Fri 16 Oct 3.20pm",schoolResumes:"Mon 2 Nov",availStart:"2026-10-16",availEnd:"2026-11-01",totalNights:16,keyDates:""},
+  { id:"autht2627",year:"2026/27",name:"Autumn Half Term 2026",schoolHol:"Mon 19 Oct – Fri 30 Oct",termEnds:"Fri 16 Oct (normal school day)",schoolResumes:"Mon 2 Nov",availStart:"2026-10-16",availEnd:"2026-11-01",totalNights:16,keyDates:""},
   { id:"xmas2627",year:"2026/27",name:"Christmas 2026/27",schoolHol:"Mon 21 Dec – Fri 1 Jan",termEnds:"Fri 18 Dec 1.10pm",schoolResumes:"Mon 4 Jan",availStart:"2026-12-18",availEnd:"2027-01-03",totalNights:16,keyDates:"Christmas Day 25 Dec"},
-  { id:"febht27",year:"2026/27",name:"Feb Half Term 2027",schoolHol:"Mon 15 – Fri 19 Feb + Inset Fri 12",termEnds:"Thu 11 Feb 3.20pm",schoolResumes:"Mon 22 Feb",availStart:"2027-02-11",availEnd:"2027-02-21",totalNights:10,keyDates:"Inset Fri 12 Feb"},
+  { id:"febht27",year:"2026/27",name:"Feb Half Term 2027",schoolHol:"Mon 15 – Fri 19 Feb + Inset Fri 12",termEnds:"Thu 11 Feb (normal school day)",schoolResumes:"Mon 22 Feb",availStart:"2027-02-11",availEnd:"2027-02-21",totalNights:10,keyDates:"Inset Fri 12 Feb"},
   { id:"easter27",year:"2026/27",name:"Easter 2027",schoolHol:"Fri 26 Mar – Fri 9 Apr",termEnds:"Thu 25 Mar 1.10pm",schoolResumes:"Mon 12 Apr",availStart:"2027-03-25",availEnd:"2027-04-11",totalNights:17,keyDates:"Good Fri 26 Mar · Easter Mon 29 Mar"},
-  { id:"mayht27",year:"2026/27",name:"May/Jun Half Term 2027",schoolHol:"Mon 31 May – Fri 4 Jun",termEnds:"Fri 28 May 3.20pm",schoolResumes:"Mon 7 Jun",availStart:"2027-05-28",availEnd:"2027-06-06",totalNights:9,keyDates:""},
+  { id:"mayht27",year:"2026/27",name:"May/Jun Half Term 2027",schoolHol:"Mon 31 May – Fri 4 Jun",termEnds:"Fri 28 May (normal school day)",schoolResumes:"Mon 7 Jun",availStart:"2027-05-28",availEnd:"2027-06-06",totalNights:9,keyDates:""},
   { id:"summer27",year:"2026/27",name:"Summer 2027",schoolHol:"From ~Mon 26 Jul (inset TBC)",termEnds:"Fri 23 Jul 1.10pm",schoolResumes:"~Sep 2027",availStart:"2027-07-23",availEnd:"2027-08-31",totalNights:39,keyDates:""},
 ];
 
@@ -447,11 +470,35 @@ function HolidayCard({holiday,me,data,onSave,isNext}) {
 }
 
 function TermDatesPanel({termDates}) {
+  var [pdfText, setPdfText] = useState(null);
+  var [pdfLoading, setPdfLoading] = useState(false);
   var years = ["2025/26","2026/27"];
+
+  async function handlePdfUpload(e) {
+    var file = e.target.files[0];
+    if (!file || !window.pdfjsLib) return;
+    setPdfLoading(true);
+    try {
+      var arrayBuffer = await file.arrayBuffer();
+      var pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+      var allText = "";
+      for (var i = 1; i <= pdf.numPages; i++) {
+        var page = await pdf.getPage(i);
+        var content = await page.getTextContent();
+        var pageText = content.items.map(function(item){return item.str;}).join(" ");
+        allText += "--- Page " + i + " ---\n" + pageText + "\n\n";
+      }
+      setPdfText(allText);
+    } catch(err) {
+      setPdfText("Error reading PDF: " + err.message);
+    }
+    setPdfLoading(false);
+  }
+
   return (
     <div style={{background:"#fff",borderRadius:14,padding:16,border:"1px solid #E8E8E8"}}>
       <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>Keston CE Primary — Term Dates</h3>
-      <p style={{fontSize:11,color:"#AAA",margin:"0 0 14px"}}>Official school calendar dates.</p>
+      <p style={{fontSize:11,color:"#AAA",margin:"0 0 14px"}}>Official school calendar dates. Verified from school documents only.</p>
       {years.map(function(y){return (
         <div key={y} style={{marginBottom:16}}>
           <div style={{fontSize:12,fontWeight:700,color:"#1F4E79",marginBottom:6,padding:"4px 8px",background:"#D6E4F0",borderRadius:6}}>{y}</div>
@@ -463,6 +510,18 @@ function TermDatesPanel({termDates}) {
           );})}
         </div>
       );})}
+
+      <div className="pdf-upload">
+        <div style={{fontSize:12,fontWeight:700,color:"#1F4E79",marginBottom:6}}>📄 Upload Keston Dates for Diaries</div>
+        <p style={{fontSize:11,color:"#888",margin:"0 0 8px"}}>Upload the latest PDF from Keston to extract dates and events.</p>
+        <input type="file" accept=".pdf" onChange={handlePdfUpload} />
+        {pdfLoading && <p style={{fontSize:11,color:"#4472C4",marginTop:8}}>Reading PDF...</p>}
+        {pdfText && <div>
+          <div style={{fontSize:11,fontWeight:700,color:"#375623",margin:"10px 0 4px"}}>Extracted text:</div>
+          <div className="pdf-output">{pdfText}</div>
+          <p style={{fontSize:10,color:"#AAA",marginTop:6}}>Review the extracted dates above. Use this to verify or update the term dates and school events.</p>
+        </div>}
+      </div>
     </div>
   );
 }
@@ -678,31 +737,48 @@ function App() {
       <div className="container">
         <h1>Joint Holiday Planner</h1>
 
-        <div className="btn-group">
+        {/* Desktop tabs - only show Term Dates toggle */}
+        <div className="btn-group hide-mobile">
+          <button className={"btn"+(tab!=="termdates"?" active":"")} onClick={function(){setTab("holidays");}}>Holidays & Calendar</button>
+          <button className={"btn"+(tab==="termdates"?" active":"")} onClick={function(){setTab("termdates");}}>Term Dates</button>
+        </div>
+
+        {/* Mobile tabs - hidden on desktop */}
+        <div className="btn-group mobile-tabs">
           <button className={"btn"+(tab==="holidays"?" active":"")} onClick={function(){setTab("holidays");}}>Holidays</button>
           <button className={"btn"+(tab==="calendar"?" active":"")} onClick={function(){setTab("calendar");}}>Calendar</button>
           <button className={"btn"+(tab==="termdates"?" active":"")} onClick={function(){setTab("termdates");}}>Term Dates</button>
         </div>
 
-        {tab==="holidays" && <div>
-          <div className="btn-group">
-            {["all","2025/26","2026/27"].map(function(y){return <button key={y} className={"btn"+(filter===y?" active":"")} onClick={function(){setFilter(y);}}>{y==="all"?"All":y}</button>;})}
-          </div>
-
-          <div className="splits">
-            <SplitBox label={"Agreed split"+(filter!=="all"?" — "+filter:"")} tO={agreed.tO} tE={agreed.tE} tA={agreed.tA} unal={agreed.unal} color="#4472C4" />
-            <SplitBox label={"If all proposals accepted"+(filter!=="all"?" — "+filter:"")} tO={proposed.tO} tE={proposed.tE} tA={proposed.tA} unal={proposed.unal} color="#70AD47" />
-          </div>
-
-          {fil.map(function(h){return <HolidayCard key={h.id} holiday={h} me={me} data={allData[h.id]||{}} onSave={handleSave} isNext={nextHoliday&&nextHoliday.id===h.id} />;})}
+        {/* Year filter - shown when holidays or calendar visible */}
+        {(tab==="holidays"||tab==="calendar") && <div className="btn-group">
+          {["all","2025/26","2026/27"].map(function(y){return <button key={y} className={"btn"+(filter===y?" active":"")} onClick={function(){setFilter(y);}}>{y==="all"?"All":y}</button>;})}
         </div>}
 
+        {/* Split summary - shown when holidays visible */}
+        {(tab==="holidays"||tab==="calendar") && <div className="splits">
+          <SplitBox label={"Agreed split"+(filter!=="all"?" — "+filter:"")} tO={agreed.tO} tE={agreed.tE} tA={agreed.tA} unal={agreed.unal} color="#4472C4" />
+          <SplitBox label={"If all proposals accepted"+(filter!=="all"?" — "+filter:"")} tO={proposed.tO} tE={proposed.tE} tA={proposed.tA} unal={proposed.unal} color="#70AD47" />
+        </div>}
+
+        {/* Desktop: side-by-side calendar + holidays. Mobile: tab-switched */}
+        {tab!=="termdates" && <div className="desktop-main">
+          {/* Calendar panel */}
+          <div className={"desktop-left"+(tab==="calendar"?" show-mobile":"")}>
+            <CalendarView allData={allData} />
+          </div>
+
+          {/* Holidays panel */}
+          <div className={"desktop-right"+(tab==="holidays"?" show-mobile":"")}>
+            {fil.map(function(h){return <HolidayCard key={h.id} holiday={h} me={me} data={allData[h.id]||{}} onSave={handleSave} isNext={nextHoliday&&nextHoliday.id===h.id} />;})}
+          </div>
+        </div>}
+
+        {/* Term Dates tab - same on desktop and mobile */}
         {tab==="termdates" && <TermDatesPanel termDates={TERM_DATES} />}
 
-        {tab==="calendar" && <CalendarView allData={allData} />}
-
         <div style={{marginTop:20,textAlign:"center",fontSize:10,color:"#CCC",lineHeight:1.6}}>
-          <p>Keston CE Primary confirmed term dates (2025-26 and revised 2026-27).</p>
+          <p>Term dates verified from Keston CE Primary school documents only.</p>
           <p>All changes sync automatically between both parents.</p>
         </div>
       </div>
