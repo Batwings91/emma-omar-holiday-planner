@@ -308,9 +308,15 @@ function ProposalBox({who,proposal,isMe,onAgree,onDelete}) {
         <div style={{textAlign:"center"}}><div style={{fontSize:18,fontWeight:800,color:"#C67A3C"}}>{proposal.emma}</div><div style={{fontSize:9,color:"#999"}}>EMMA</div></div>
         <div style={{flex:1}}><Bar omar={proposal.omar} emma={proposal.emma} total={proposal.omar+proposal.emma} /></div>
       </div>
-      {(proposal.omarDates||proposal.emmaDates) && <div style={{marginTop:8,fontSize:11,lineHeight:1.6}}>
-        {proposal.omarDates && <div style={{color:"#4A8C62"}}><strong>Omar:</strong> {proposal.omarDates}</div>}
-        {proposal.emmaDates && <div style={{color:"#C67A3C"}}><strong>Emma:</strong> {proposal.emmaDates}</div>}
+      {(proposal.omarDates||proposal.emmaDates) && <div style={{marginTop:10,padding:"8px 10px",borderRadius:8,background:"rgba(255,255,255,0.6)",border:"1px solid rgba(0,0,0,0.06)"}}>
+        {proposal.omarDates && <div style={{display:"flex",alignItems:"center",gap:6,padding:"4px 0",borderBottom:proposal.emmaDates?"1px solid rgba(0,0,0,0.06)":"none"}}>
+          <div style={{width:18,height:18,borderRadius:4,background:"#C6EFCE",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:"#4A8C62",flexShrink:0}}>O</div>
+          <div style={{fontSize:12,color:"#4A8C62",fontWeight:600}}>{proposal.omarDates}</div>
+        </div>}
+        {proposal.emmaDates && <div style={{display:"flex",alignItems:"center",gap:6,padding:"4px 0"}}>
+          <div style={{width:18,height:18,borderRadius:4,background:"#FCE4D6",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:"#C67A3C",flexShrink:0}}>E</div>
+          <div style={{fontSize:12,color:"#C67A3C",fontWeight:600}}>{proposal.emmaDates}</div>
+        </div>}
       </div>}
       {proposal.notes && <div style={{fontSize:11,color:"#777",marginTop:6,fontStyle:"italic"}}>{proposal.notes}</div>}
       {!isMe && onAgree && <button className="accept-btn" onClick={onAgree}>Accept this proposal ✓</button>}
@@ -415,15 +421,13 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
             {isNow && <span style={{fontSize:10,color:"#70AD47",fontWeight:600}}>Happening now</span>}
           </div>}
         </div>
-        <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-          {alloc>0 && <div style={{display:"flex",alignItems:"center",gap:5}}>
-            <div style={{display:"flex",alignItems:"center",gap:3}}>
-              <div style={{textAlign:"center"}}><div style={{fontSize:8,fontWeight:700,color:"#4A8C62"}}>O</div><div style={{fontSize:16,fontWeight:800,color:"#4A8C62"}}>{eo}</div></div>
-              <span style={{color:"#DDD",fontSize:12}}>:</span>
-              <div style={{textAlign:"center"}}><div style={{fontSize:8,fontWeight:700,color:"#C67A3C"}}>E</div><div style={{fontSize:16,fontWeight:800,color:"#C67A3C"}}>{ee}</div></div>
-            </div>
-          </div>}
+        <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
           {otherP&&!myP&&!hasAgr&&!locked && <span className="badge" style={{background:"#C00",color:"#fff",animation:"pulse 2s infinite",fontSize:8,padding:"2px 6px"}}>REVIEW</span>}
+          {alloc>0 && <div style={{display:"flex",alignItems:"center",gap:3,minWidth:52,justifyContent:"center"}}>
+            <div style={{textAlign:"center"}}><div style={{fontSize:8,fontWeight:700,color:"#4A8C62"}}>O</div><div style={{fontSize:16,fontWeight:800,color:"#4A8C62"}}>{eo}</div></div>
+            <span style={{color:"#DDD",fontSize:12}}>:</span>
+            <div style={{textAlign:"center"}}><div style={{fontSize:8,fontWeight:700,color:"#C67A3C"}}>E</div><div style={{fontSize:16,fontWeight:800,color:"#C67A3C"}}>{ee}</div></div>
+          </div>}
           <span className={"chevron"+(isOpen?" open":"")}>▾</span>
         </div>
       </div>
@@ -443,9 +447,15 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
             <div><span style={{fontSize:18,fontWeight:800,color:"#C67A3C"}}>{agr.emma}</span> <span style={{fontSize:9,color:"#888"}}>Emma</span></div>
             <div style={{flex:1}}><Bar omar={agr.omar} emma={agr.emma} total={agr.omar+agr.emma} /></div>
           </div>
-          {(agr.omarDates||agr.emmaDates) && <div style={{marginTop:8,fontSize:11,lineHeight:1.6}}>
-            {agr.omarDates && <div style={{color:"#4A8C62"}}><strong>Omar:</strong> {agr.omarDates}</div>}
-            {agr.emmaDates && <div style={{color:"#C67A3C"}}><strong>Emma:</strong> {agr.emmaDates}</div>}
+          {(agr.omarDates||agr.emmaDates) && <div style={{marginTop:10,padding:"8px 10px",borderRadius:8,background:"rgba(255,255,255,0.5)"}}>
+            {agr.omarDates && <div style={{display:"flex",alignItems:"center",gap:6,padding:"4px 0",borderBottom:agr.emmaDates?"1px solid rgba(0,0,0,0.06)":"none"}}>
+              <div style={{width:18,height:18,borderRadius:4,background:"#C6EFCE",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:"#4A8C62",flexShrink:0}}>O</div>
+              <div style={{fontSize:12,color:"#4A8C62",fontWeight:600}}>{agr.omarDates}</div>
+            </div>}
+            {agr.emmaDates && <div style={{display:"flex",alignItems:"center",gap:6,padding:"4px 0"}}>
+              <div style={{width:18,height:18,borderRadius:4,background:"#FCE4D6",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:"#C67A3C",flexShrink:0}}>E</div>
+              <div style={{fontSize:12,color:"#C67A3C",fontWeight:600}}>{agr.emmaDates}</div>
+            </div>}
           </div>}
           {agr.notes && <div style={{fontSize:11,color:"#555",marginTop:6,fontStyle:"italic"}}>{agr.notes}</div>}
         </div>}
@@ -466,9 +476,15 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
             <div><span style={{fontSize:18,fontWeight:800,color:"#C67A3C"}}>{data.agreement.emma}</span> <span style={{fontSize:9,color:"#888"}}>Emma</span></div>
             <div style={{flex:1}}><Bar omar={data.agreement.omar} emma={data.agreement.emma} total={data.agreement.omar+data.agreement.emma} /></div>
           </div>
-          {(data.agreement.omarDates||data.agreement.emmaDates) && <div style={{marginTop:8,fontSize:11,lineHeight:1.6}}>
-            {data.agreement.omarDates && <div style={{color:"#4A8C62"}}><strong>Omar:</strong> {data.agreement.omarDates}</div>}
-            {data.agreement.emmaDates && <div style={{color:"#C67A3C"}}><strong>Emma:</strong> {data.agreement.emmaDates}</div>}
+          {(data.agreement.omarDates||data.agreement.emmaDates) && <div style={{marginTop:10,padding:"8px 10px",borderRadius:8,background:"rgba(255,255,255,0.5)"}}>
+            {data.agreement.omarDates && <div style={{display:"flex",alignItems:"center",gap:6,padding:"4px 0",borderBottom:data.agreement.emmaDates?"1px solid rgba(0,0,0,0.06)":"none"}}>
+              <div style={{width:18,height:18,borderRadius:4,background:"#C6EFCE",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:"#4A8C62",flexShrink:0}}>O</div>
+              <div style={{fontSize:12,color:"#4A8C62",fontWeight:600}}>{data.agreement.omarDates}</div>
+            </div>}
+            {data.agreement.emmaDates && <div style={{display:"flex",alignItems:"center",gap:6,padding:"4px 0"}}>
+              <div style={{width:18,height:18,borderRadius:4,background:"#FCE4D6",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:"#C67A3C",flexShrink:0}}>E</div>
+              <div style={{fontSize:12,color:"#C67A3C",fontWeight:600}}>{data.agreement.emmaDates}</div>
+            </div>}
           </div>}
         </div>}
 
@@ -679,9 +695,10 @@ function TermDatesPanel({termDates, onTermUpdate, me, allData}) {
           var tb3 = {holiday:"#E8C84A",term:"#E8E8E8",inset:"#A3C985",event:"#C4A8E0"};
           return React.createElement("div", {key:t.id, style:{display:"flex",gap:4,padding:"6px 8px",marginBottom:2,borderRadius:6,background:tc2[t.type]||"#fff",border:"1px solid "+(tb3[t.type]||"#E8E8E8"),opacity:isPast?0.45:1,outline:isNext?"2px solid #4472C4":"none",outlineOffset:"-1px",alignItems:"center",flexWrap:"wrap"}},
             isNext && React.createElement("span", {style:{fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:"#4472C4",color:"#fff",marginRight:4}}, "NEXT"),
-            React.createElement("span", {onClick:function(){setEditId(t.id);setDraft(Object.assign({},t));}, style:{fontSize:11,fontWeight:t.type==="holiday"?700:400,flex:"1 1 120px",cursor:"pointer",minWidth:0}}, t.period),
+            React.createElement("span", {onClick:function(){setEditId(t.id);setDraft(Object.assign({},t));}, style:{fontSize:11,fontWeight:t.type==="holiday"?700:400,cursor:"pointer",minWidth:0}}, t.period),
+            holStatus && React.createElement("span", {style:{fontSize:9,fontWeight:600,marginLeft:2,padding:"1px 5px",borderRadius:4,background:holStatus.agreed?"#C6EFCE":"#FCE4D6",color:holStatus.agreed?"#375623":"#C00"}}, holStatus.agreed?"\u2713 Agreed":"\u2717 Not agreed"),
+            React.createElement("span", {style:{flex:1}}),
             React.createElement("span", {style:{fontSize:10,color:"#888",whiteSpace:"nowrap"}}, fmtShort(t.start) + (t.end&&t.end!==t.start?" \u2192 "+fmtShort(t.end):"")),
-            holStatus && React.createElement("span", {style:{fontSize:9,fontWeight:600,marginLeft:4,padding:"1px 5px",borderRadius:4,background:holStatus.agreed?"#C6EFCE":"#FCE4D6",color:holStatus.agreed?"#375623":"#C00"}}, holStatus.agreed?"\u2713 Split agreed":"\u2717 Split not agreed"),
             t.flag && React.createElement("span", {style:{fontSize:9,color:"#C00",fontWeight:600,marginLeft:4}}, "\u26a0\ufe0f " + t.flag + " (" + (t.flaggedBy||"") + ")"),
             t.flag && React.createElement("button", {onClick:function(){clearFlag(t.id);}, style:{fontSize:9,color:"#70AD47",background:"none",border:"none",cursor:"pointer",fontWeight:600}}, "\u2713 Resolve"),
             t.lastModifiedBy && React.createElement("span", {style:{fontSize:8,color:"#BBB",marginLeft:4}}, "edited " + (t.lastModifiedBy||"")),
