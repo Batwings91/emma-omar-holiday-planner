@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Holiday Planner — Keston CE Primary</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: linear-gradient(180deg, #F5F7FA, #E8ECF2); min-height: 100vh; color: #333; }
+  .banner { background: #1F4E79; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .banner span { font-size: 12px; color: #B8D4F0; }
+  .banner strong { font-size: 13px; color: #fff; }
+  .container { max-width: 700px; margin: 0 auto; padding: 14px 12px 40px; }
+  h1 { font-size: 18px; font-weight: 800; color: #2B2B2B; margin-bottom: 12px; }
+  .btn { padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1.5px solid #DDD; background: #fff; color: #999; transition: all 0.15s; }
+  .btn.active { border-color: #4472C4; background: #4472C4; color: #fff; }
+  .btn.primary { border: none; background: #4472C4; color: #fff; }
+  .btn.outline { border-color: #4472C4; background: #fff; color: #4472C4; }
+  .btn-group { display: flex; gap: 4px; margin-bottom: 12px; }
+  .splits { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .split-box { flex: 1 1 200px; padding: 12px 14px; border-radius: 10px; background: #fff; }
+  .split-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .bar-wrap { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: #ECECEC; width: 100%; }
+  .bar-omar { background: #6BAF82; transition: width 0.4s; }
+  .bar-emma { background: #E8A667; transition: width 0.4s; }
+  .pct-row { display: flex; justify-content: space-between; margin-top: 4px; margin-bottom: 8px; }
+  .pct-omar { font-size: 16px; font-weight: 800; color: #4A8C62; }
+  .pct-emma { font-size: 16px; font-weight: 800; color: #C67A3C; }
+  .pct-sub { font-size: 10px; color: #999; }
+  .stat-row { display: flex; gap: 6px; }
+  .stat { padding: 3px 7px; border-radius: 6px; text-align: center; flex: 1; }
+  .stat-val { font-size: 14px; font-weight: 800; }
+  .stat-lbl { font-size: 8px; font-weight: 600; opacity: 0.7; }
+  .card { background: #fff; border-radius: 14px; border: 1px solid #E8E8E8; overflow: hidden; margin-bottom: 7px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+  .card.next { border-color: #4472C4; box-shadow: 0 0 0 2px rgba(68,114,196,0.13), 0 4px 20px rgba(0,0,0,0.08); }
+  .card.past { opacity: 0.55; }
+  .card-header { padding: 12px 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+  .card-body { padding: 0 14px 14px; border-top: 1px solid #F0F0F0; }
+  .badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.4px; display: inline-block; }
+  .info-box { margin-top: 10px; margin-bottom: 10px; padding: 8px 10px; border-radius: 8px; background: #F8F9FB; border: 1px solid #EAEDF2; font-size: 11px; line-height: 1.7; color: #666; }
+  .agreed-box { padding: 12px; border-radius: 10px; background: #DDEBF7; border: 1.5px solid #4472C4; margin-bottom: 10px; }
+  .partial-box { padding: 10px; border-radius: 10px; background: #FFF8ED; border: 1.5px solid #ED7D31; margin-bottom: 10px; }
+  .proposal-box { padding: 12px 14px; border-radius: 10px; margin-bottom: 8px; }
+  .proposal-box.omar { background: #F0FAF3; border: 1.5px solid #C6EFCE; }
+  .proposal-box.emma { background: #FEF6EF; border: 1.5px solid #FCE4D6; }
+  .draft-box { padding: 14px; border-radius: 10px; background: #FAFBFF; border: 1.5px solid #4472C4; margin-bottom: 10px; }
+  .night-input { width: 54px; height: 34px; text-align: center; font-size: 15px; font-weight: 700; border-radius: 8px; font-family: inherit; outline: none; }
+  .night-input.omar { border: 2px solid #6BAF82; background: #F0FAF3; }
+  .night-input.emma { border: 2px solid #E8A667; background: #FEF6EF; }
+  .text-input { width: 100%; padding: 8px 10px; border-radius: 8px; font-size: 12px; font-family: inherit; outline: none; box-sizing: border-box; }
+  .text-input.omar { border: 1.5px solid #C6EFCE; }
+  .text-input.emma { border: 1.5px solid #FCE4D6; }
+  .text-input.notes { border: 1.5px solid #D6E4F0; }
+  textarea.text-input { min-height: 48px; resize: vertical; line-height: 1.5; }
+  .empty-state { padding: 14px; border-radius: 10px; background: #FAFAFA; border: 1px dashed #DDD; text-align: center; }
+  .term-row { display: flex; gap: 8px; padding: 7px 10px; margin-bottom: 2px; border-radius: 6px; cursor: pointer; align-items: center; }
+  .term-row.holiday { background: #FFF2CC; border: 1px solid #E8C84A; }
+  .term-row.term { background: #fff; border: 1px solid #E8E8E8; }
+  .term-row.inset { background: #E2EFDA; border: 1px solid #A3C985; }
+  .landing { display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; padding: 20px; }
+  .who-btn { width: 140px; padding: 22px 0; border-radius: 14px; cursor: pointer; font-size: 16px; font-weight: 700; }
+  .who-btn.omar { border: 2px solid #6BAF82; background: #F0FAF3; color: #4A8C62; }
+  .who-btn.emma { border: 2px solid #E8A667; background: #FEF6EF; color: #C67A3C; }
+  .withdraw-btn { font-size: 10px; color: #C00; background: none; border: none; cursor: pointer; font-weight: 600; }
+  .accept-btn { margin-top: 10px; padding: 7px 18px; border-radius: 8px; font-size: 12px; font-weight: 700; background: #4472C4; color: #fff; border: none; cursor: pointer; }
+  .chevron { font-size: 15px; color: #CCC; transition: transform 0.2s; display: inline-block; }
+  .chevron.open { transform: rotate(180deg); }
+  @media (max-width: 500px) { .banner { font-size: 11px; } .splits { flex-direction: column; } }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback, useMemo, useRef } = React;
+
+// ══════════════════════════════════════════════════
+// FIREBASE CONFIG — Replace with your project values
+// ══════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBi2TgMdkZl_E26DfP1PExv-K_ZNWEcmtY",
+  authDomain: "emma-omar-holiday-planner.firebaseapp.com",
+  databaseURL: "https://emma-omar-holiday-planner-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "emma-omar-holiday-planner",
+  storageBucket: "emma-omar-holiday-planner.firebasestorage.app",
+  messagingSenderId: "102876390346",
+  appId: "1:102876390346:web:ba262c7fa8bc59a0aae533"
+};
+
+let db = null;
+try {
+  const app = firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.database();
+} catch(e) {
+  console.warn("Firebase not configured:", e.message);
+}
+
+function fbGet(path) {
+  return new Promise(function(resolve) {
+    if (!db) { resolve(null); return; }
+    db.ref(path).once("value").then(function(snap) { resolve(snap.val()); }).catch(function() { resolve(null); });
+  });
+}
+function fbSet(path, val) {
+  return new Promise(function(resolve) {
+    if (!db) { resolve(false); return; }
+    db.ref(path).set(val).then(function() { resolve(true); }).catch(function() { resolve(false); });
+  });
+}
+function fbListen(path, cb) {
+  if (!db) return function(){};
+  const ref = db.ref(path);
+  ref.on("value", function(snap) { cb(snap.val()); });
+  return function() { ref.off("value"); };
+}
+
+// ══════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════
+const HOLIDAYS = [
+  { id:"xmas25",year:"2025/26",name:"Christmas 2025",schoolHol:"Mon 22 Dec – Fri 2 Jan",termEnds:"Fri 19 Dec 1.10pm",schoolResumes:"Mon 5 Jan",availStart:"2025-12-19",availEnd:"2026-01-04",totalNights:16,keyDates:"Christmas Day 25 Dec",locked:true,agreed:{omar:5,emma:11,source:"Mediation OS JS2",omarDates:"Mon 22 Dec 6pm → Sat 27 Dec 11:30am",emmaDates:"Fri 19 Dec 1.10pm → Mon 22 Dec 6pm + Sat 27 Dec → Sun 4 Jan",notes:""}},
+  { id:"febht26",year:"2025/26",name:"Feb Half Term 2026",schoolHol:"Mon 16 – Fri 20 Feb + Inset Fri 13",termEnds:"Thu 12 Feb 3.20pm",schoolResumes:"Mon 23 Feb",availStart:"2026-02-13",availEnd:"2026-02-22",totalNights:9,keyDates:"Inset Fri 13 Feb",locked:true,agreed:{omar:5,emma:4,source:"Agreed",omarDates:"Fri 13 Feb → Wed 18 Feb 6:45pm",emmaDates:"Wed 18 Feb 6:45pm → Sun 22 Feb",notes:""}},
+  { id:"easter26",year:"2025/26",name:"Easter 2026",schoolHol:"Mon 30 Mar – Fri 10 Apr",termEnds:"Fri 27 Mar 1.10pm",schoolResumes:"Mon 13 Apr",availStart:"2026-03-27",availEnd:"2026-04-12",totalNights:16,keyDates:"Good Fri 3 Apr · Easter Mon 6 Apr",locked:true,agreed:{omar:9,emma:7,source:"Agreed per email",omarDates:"Fri 27 Mar 1.10pm → Fri 3 Apr 11am + Fri 10 Apr 6pm → Sun 12 Apr",emmaDates:"Fri 3 Apr 11am → Fri 10 Apr 6pm",notes:"Emma: \"this is my year for Easter as you had Christmas.\""}},
+  { id:"mayht26",year:"2025/26",name:"May Half Term 2026",schoolHol:"Mon 25 – Fri 29 May",termEnds:"Fri 22 May 3.20pm",schoolResumes:"Mon 1 Jun",availStart:"2026-05-22",availEnd:"2026-05-31",totalNights:9,keyDates:""},
+  { id:"summer26",year:"2025/26",name:"Summer 2026",schoolHol:"From Mon 20 Jul (inset Mon–Wed)",termEnds:"Fri 17 Jul 1.10pm",schoolResumes:"~Sep 2026",availStart:"2026-07-17",availEnd:"2026-08-31",totalNights:45,keyDates:"Omar 27 Jul – 9 Aug agreed",partialAgreed:{omar:13,note:"Omar 27 Jul – 9 Aug agreed. Remaining ~32 nights to discuss.",omarDates:"Mon 27 Jul → Sat 9 Aug"}},
+  { id:"autht2627",year:"2026/27",name:"Autumn Half Term 2026",schoolHol:"Mon 19 Oct – Fri 30 Oct",termEnds:"Fri 16 Oct 3.20pm",schoolResumes:"Mon 2 Nov",availStart:"2026-10-16",availEnd:"2026-11-01",totalNights:16,keyDates:""},
+  { id:"xmas2627",year:"2026/27",name:"Christmas 2026/27",schoolHol:"Mon 21 Dec – Fri 1 Jan",termEnds:"Fri 18 Dec 1.10pm",schoolResumes:"Mon 4 Jan",availStart:"2026-12-18",availEnd:"2027-01-03",totalNights:16,keyDates:"Christmas Day 25 Dec"},
+  { id:"febht27",year:"2026/27",name:"Feb Half Term 2027",schoolHol:"Mon 15 – Fri 19 Feb + Inset Fri 12",termEnds:"Thu 11 Feb 3.20pm",schoolResumes:"Mon 22 Feb",availStart:"2027-02-11",availEnd:"2027-02-21",totalNights:10,keyDates:"Inset Fri 12 Feb"},
+  { id:"easter27",year:"2026/27",name:"Easter 2027",schoolHol:"Fri 26 Mar – Fri 9 Apr",termEnds:"Thu 25 Mar 1.10pm",schoolResumes:"Mon 12 Apr",availStart:"2027-03-25",availEnd:"2027-04-11",totalNights:17,keyDates:"Good Fri 26 Mar · Easter Mon 29 Mar"},
+  { id:"mayht27",year:"2026/27",name:"May/Jun Half Term 2027",schoolHol:"Mon 31 May – Fri 4 Jun",termEnds:"Fri 28 May 3.20pm",schoolResumes:"Mon 7 Jun",availStart:"2027-05-28",availEnd:"2027-06-06",totalNights:9,keyDates:""},
+  { id:"summer27",year:"2026/27",name:"Summer 2027",schoolHol:"From ~Mon 26 Jul (inset TBC)",termEnds:"Fri 23 Jul 1.10pm",schoolResumes:"~Sep 2027",availStart:"2027-07-23",availEnd:"2027-08-31",totalNights:39,keyDates:""},
+];
+
+const EMMA_SEED = {
+  autht2627:{omar:7,emma:9,notes:"1st week (19–25 Oct) Omar, 2nd week (26 Oct–1 Nov) Emma.",omarDates:"Fri 16 Oct PM → Fri 23 Oct",emmaDates:"Fri 23 Oct → Sun 1 Nov"},
+  xmas2627:{omar:7,emma:9,notes:"1st week (21–27 Dec) Emma, 2nd week (28 Dec–3 Jan) Omar.",omarDates:"Sat 27 Dec → Sun 3 Jan",emmaDates:"Fri 18 Dec 1.10pm → Sat 27 Dec"},
+  febht27:{omar:6,emma:4,notes:"1st half (12–18 Feb 8am) Omar, 2nd half (19–22 Feb) Emma.",omarDates:"Thu 11 Feb PM → Wed 17 Feb",emmaDates:"Wed 18 Feb → Sun 21 Feb"},
+  easter27:{omar:6,emma:9,notes:"1st half (26 Mar – 1 Apr) Omar, 2nd half (1 Apr – 9 Apr) Emma.",omarDates:"Thu 25 Mar 1.10pm → Wed 31 Mar",emmaDates:"Wed 31 Mar → Fri 9 Apr 6pm"},
+  mayht27:{omar:4,emma:5,notes:"1st half (28 May – 2 Jun 6pm) Emma, 2nd half (2 Jun – 6 Jun 6pm) Omar.",omarDates:"Tue 2 Jun 6pm → Sun 6 Jun",emmaDates:"Fri 28 May PM → Tue 2 Jun 6pm"},
+};
+
+const TERM_DATES = [
+  {id:"t1",year:"2025/26",period:"Inset Day",start:"2025-08-27",end:"2025-08-27",type:"inset"},
+  {id:"t2",year:"2025/26",period:"Autumn Term 1",start:"2025-08-28",end:"2025-10-17",type:"term"},
+  {id:"t3",year:"2025/26",period:"Autumn Half Term",start:"2025-10-20",end:"2025-10-31",type:"holiday"},
+  {id:"t4",year:"2025/26",period:"Autumn Term 2",start:"2025-11-03",end:"2025-12-19",type:"term"},
+  {id:"t5",year:"2025/26",period:"Christmas Holiday",start:"2025-12-22",end:"2026-01-02",type:"holiday"},
+  {id:"t6",year:"2025/26",period:"Spring Term 1",start:"2026-01-05",end:"2026-02-12",type:"term"},
+  {id:"t7",year:"2025/26",period:"Inset Day (Aquinas)",start:"2026-02-13",end:"2026-02-13",type:"inset"},
+  {id:"t8",year:"2025/26",period:"February Half Term",start:"2026-02-16",end:"2026-02-20",type:"holiday"},
+  {id:"t9",year:"2025/26",period:"Spring Term 2",start:"2026-02-23",end:"2026-03-27",type:"term"},
+  {id:"t10",year:"2025/26",period:"Easter Holiday",start:"2026-03-30",end:"2026-04-10",type:"holiday"},
+  {id:"t11",year:"2025/26",period:"Summer Term 1",start:"2026-04-13",end:"2026-05-22",type:"term"},
+  {id:"t12",year:"2025/26",period:"May Half Term",start:"2026-05-25",end:"2026-05-29",type:"holiday"},
+  {id:"t13",year:"2025/26",period:"Summer Term 2",start:"2026-06-01",end:"2026-07-17",type:"term"},
+  {id:"t14",year:"2025/26",period:"Inset Days (staff)",start:"2026-07-20",end:"2026-07-22",type:"inset"},
+  {id:"t15",year:"2025/26",period:"Summer Holiday",start:"2026-07-23",end:"2026-08-31",type:"holiday"},
+  {id:"t16",year:"2026/27",period:"Inset Day",start:"2026-09-01",end:"2026-09-01",type:"inset"},
+  {id:"t17",year:"2026/27",period:"Autumn Term 1",start:"2026-09-02",end:"2026-10-16",type:"term"},
+  {id:"t18",year:"2026/27",period:"Autumn Half Term",start:"2026-10-19",end:"2026-10-30",type:"holiday"},
+  {id:"t19",year:"2026/27",period:"Autumn Term 2",start:"2026-11-02",end:"2026-12-18",type:"term"},
+  {id:"t20",year:"2026/27",period:"Christmas Holiday",start:"2026-12-21",end:"2027-01-01",type:"holiday"},
+  {id:"t21",year:"2026/27",period:"Spring Term 1",start:"2027-01-04",end:"2027-02-11",type:"term"},
+  {id:"t22",year:"2026/27",period:"Inset Day",start:"2027-02-12",end:"2027-02-12",type:"inset"},
+  {id:"t23",year:"2026/27",period:"February Half Term",start:"2027-02-15",end:"2027-02-19",type:"holiday"},
+  {id:"t24",year:"2026/27",period:"Spring Term 2",start:"2027-02-22",end:"2027-03-25",type:"term"},
+  {id:"t25",year:"2026/27",period:"Easter Holiday",start:"2027-03-26",end:"2027-04-09",type:"holiday"},
+  {id:"t26",year:"2026/27",period:"Summer Term 1",start:"2027-04-12",end:"2027-05-28",type:"term"},
+  {id:"t27",year:"2026/27",period:"May/Jun Half Term",start:"2027-05-31",end:"2027-06-04",type:"holiday"},
+  {id:"t28",year:"2026/27",period:"Summer Term 2",start:"2027-06-07",end:"2027-07-23",type:"term"},
+  {id:"t29",year:"2026/27",period:"Inset Days (commuted)",start:"2027-07-24",end:"2027-07-24",type:"inset"},
+  {id:"t30",year:"2026/27",period:"Summer Holiday",start:"2027-07-24",end:"2027-08-31",type:"holiday"},
+];
+
+const TODAY = new Date().toISOString().split("T")[0];
+function fmtDate(d){if(!d)return"";return new Date(d+"T12:00:00").toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});}
+function fmtShort(d){if(!d)return"";return new Date(d+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short"});}
+function fmtMed(d){if(!d)return"";return new Date(d+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});}
+function daysUntil(d){return Math.ceil((new Date(d+"T00:00:00")-new Date(TODAY+"T00:00:00"))/86400000);}
+function nm(w){return w==="omar"?"Omar":"Emma";}
+function getNextHoliday(){return HOLIDAYS.find(function(h){return daysUntil(h.availEnd)>=0;})||null;}
+
+// ══════════════════════════════════════════════════
+// COMPONENTS
+// ══════════════════════════════════════════════════
+
+function Bar({omar,emma,total}) {
+  var op=total>0?(omar/total)*100:0, ep=total>0?(emma/total)*100:0;
+  return React.createElement("div",{className:"bar-wrap"},
+    React.createElement("div",{className:"bar-omar",style:{width:op+"%"}}),
+    React.createElement("div",{className:"bar-emma",style:{width:ep+"%"}})
+  );
+}
+
+function SplitBox({label,tO,tE,tA,unal,color}) {
+  var oP=tA>0?Math.round((tO/tA)*100):0, eP=tA>0?100-oP:0;
+  return (
+    <div className="split-box" style={{border:"1.5px solid "+color+"30"}}>
+      <div className="split-label" style={{color:color}}>{label}</div>
+      <Bar omar={tO} emma={tE} total={tA} />
+      <div className="pct-row">
+        <span><span className="pct-omar">{oP}%</span> <span className="pct-sub">({tO}n)</span></span>
+        <span><span className="pct-sub">({tE}n)</span> <span className="pct-emma">{eP}%</span></span>
+      </div>
+      <div className="stat-row">
+        <div className="stat" style={{background:"#F0FAF3",border:"1px solid #C6EFCE"}}><div className="stat-val" style={{color:"#4A8C62"}}>{tO}</div><div className="stat-lbl" style={{color:"#4A8C62"}}>OMAR</div></div>
+        <div className="stat" style={{background:"#FEF6EF",border:"1px solid #FCE4D6"}}><div className="stat-val" style={{color:"#C67A3C"}}>{tE}</div><div className="stat-lbl" style={{color:"#C67A3C"}}>EMMA</div></div>
+        <div className="stat" style={{background:"#F5F5F5",border:"1px solid #E0E0E0"}}><div className="stat-val" style={{color:"#999"}}>{unal}</div><div className="stat-lbl" style={{color:"#999"}}>OPEN</div></div>
+      </div>
+    </div>
+  );
+}
+
+function ProposalBox({who,proposal,isMe,onAgree,onDelete}) {
+  var when = proposal.timestamp ? new Date(proposal.timestamp).toLocaleDateString("en-GB",{day:"numeric",month:"short"}) : "";
+  return (
+    <div className={"proposal-box "+who}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:6}}>
+          <span style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.8px",color:who==="omar"?"#4A8C62":"#C67A3C"}}>{nm(who)}'s proposal</span>
+          {when && <span style={{fontSize:10,color:"#BBB"}}>{when}</span>}
+        </div>
+        {isMe && onDelete && <button className="withdraw-btn" onClick={onDelete}>✕ Withdraw</button>}
+      </div>
+      <div style={{display:"flex",gap:14,alignItems:"center"}}>
+        <div style={{textAlign:"center"}}><div style={{fontSize:18,fontWeight:800,color:"#4A8C62"}}>{proposal.omar}</div><div style={{fontSize:9,color:"#999"}}>OMAR</div></div>
+        <div style={{textAlign:"center"}}><div style={{fontSize:18,fontWeight:800,color:"#C67A3C"}}>{proposal.emma}</div><div style={{fontSize:9,color:"#999"}}>EMMA</div></div>
+        <div style={{flex:1}}><Bar omar={proposal.omar} emma={proposal.emma} total={proposal.omar+proposal.emma} /></div>
+      </div>
+      {(proposal.omarDates||proposal.emmaDates) && <div style={{marginTop:8,fontSize:11,lineHeight:1.6}}>
+        {proposal.omarDates && <div style={{color:"#4A8C62"}}><strong>Omar:</strong> {proposal.omarDates}</div>}
+        {proposal.emmaDates && <div style={{color:"#C67A3C"}}><strong>Emma:</strong> {proposal.emmaDates}</div>}
+      </div>}
+      {proposal.notes && <div style={{fontSize:11,color:"#777",marginTop:6,fontStyle:"italic"}}>{proposal.notes}</div>}
+      {!isMe && onAgree && <button className="accept-btn" onClick={onAgree}>Accept this proposal ✓</button>}
+    </div>
+  );
+}
+
+function HolidayCard({holiday,me,data,onSave,isNext}) {
+  var [open,setOpen] = useState(false);
+  var [drafting,setDrafting] = useState(false);
+  var [dO,setDO] = useState(""); var [dE,setDE] = useState("");
+  var [dOD,setDOD] = useState(""); var [dED,setDED] = useState("");
+  var [dN,setDN] = useState("");
+
+  var other = me==="omar"?"emma":"omar";
+  var myP = data&&data.proposals&&data.proposals[me] ? data.proposals[me] : null;
+  var otherP = data&&data.proposals&&data.proposals[other] ? data.proposals[other] : null;
+  var agr = (data&&data.agreement)||holiday.agreed||null;
+  var locked = !!holiday.locked;
+  var partial = holiday.partialAgreed;
+  var eo = (agr?agr.omar:0)||(myP?myP.omar:0)||(otherP?otherP.omar:0)||(partial?partial.omar:0)||0;
+  var ee = (agr?agr.emma:0)||(myP?myP.emma:0)||(otherP?otherP.emma:0)||0;
+  var alloc = eo+ee;
+  var matched = myP&&otherP&&myP.omar===otherP.omar&&myP.emma===otherP.emma;
+  var hasAgr = !!agr||!!(data&&data.agreement)||!!matched;
+  var st = hasAgr?"Agreed":(myP&&otherP)?"Both proposed":myP?nm(me)+"'s proposal":otherP?nm(other)+"'s proposal":partial?"Partial":"Open";
+  var sc2 = hasAgr?"#4472C4":(myP&&otherP)?"#ED7D31":(myP||otherP)?"#70AD47":partial?"#ED7D31":"#CCC";
+  var sb = hasAgr?"#DDEBF7":(myP&&otherP)?"#FFF2CC":(myP||otherP)?"#E2EFDA":partial?"#FFF2CC":"#F5F5F5";
+  var du = daysUntil(holiday.availStart); var duEnd = daysUntil(holiday.availEnd);
+  var isPast = duEnd<0; var isNow = du<=0&&duEnd>=0;
+
+  function startDraft(){
+    var b=otherP||myP||{};
+    setDO(b.omar!=null?String(b.omar):""); setDE(b.emma!=null?String(b.emma):"");
+    setDOD((myP&&myP.omarDates)||(b.omarDates)||""); setDED((myP&&myP.emmaDates)||(b.emmaDates)||"");
+    setDN((myP&&myP.notes)||""); setDrafting(true);
+  }
+  function submit(){
+    var o=parseInt(dO)||0, e=parseInt(dE)||0;
+    var prop={omar:o,emma:e,notes:dN,omarDates:dOD,emmaDates:dED,timestamp:new Date().toISOString()};
+    var np=Object.assign({},data&&data.proposals?data.proposals:{});np[me]=prop;
+    var nd=Object.assign({},data,{proposals:np});
+    if(otherP&&otherP.omar===o&&otherP.emma===e){nd.agreement={omar:o,emma:e,source:nm(me)+" accepted "+nm(other)+"'s proposal",agreedAt:new Date().toISOString(),notes:dN||otherP.notes,omarDates:dOD||otherP.omarDates,emmaDates:dED||otherP.emmaDates};}
+    onSave(holiday.id,nd);setDrafting(false);
+  }
+  function accept(){
+    var np=Object.assign({},data&&data.proposals?data.proposals:{});np[me]=Object.assign({},otherP,{timestamp:new Date().toISOString()});
+    var nd=Object.assign({},data,{proposals:np,agreement:{omar:otherP.omar,emma:otherP.emma,source:nm(me)+" accepted "+nm(other)+"'s proposal",agreedAt:new Date().toISOString(),notes:otherP.notes,omarDates:otherP.omarDates,emmaDates:otherP.emmaDates}});
+    onSave(holiday.id,nd);
+  }
+  function deleteMyP(){
+    var np=Object.assign({},data&&data.proposals?data.proposals:{});delete np[me];
+    var nd=Object.assign({},data,{proposals:np});delete nd.agreement;onSave(holiday.id,nd);
+  }
+
+  var cardClass = "card"+(isNext?" next":"")+(isPast&&!locked?" past":"");
+
+  return (
+    <div className={cardClass} style={{borderLeft:"4px solid "+sc2}}>
+      <div className="card-header" onClick={function(){setOpen(!open);}}>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+            {isNext && <span className="badge" style={{background:"#4472C4",color:"#fff"}}>NEXT HOLIDAY</span>}
+            {isNow&&!isNext && <span className="badge" style={{background:"#70AD47",color:"#fff"}}>NOW</span>}
+            <span style={{fontWeight:700,fontSize:14}}>{holiday.name}</span>
+            <span className="badge" style={{background:sb,color:sc2}}>{st}</span>
+          </div>
+          <div style={{fontSize:11,color:"#AAA",marginTop:2}}>
+            School hol: {holiday.schoolHol} · Available: {fmtMed(holiday.availStart)} PM → {fmtMed(holiday.availEnd)} · <strong style={{color:"#777"}}>{holiday.totalNights}n</strong>
+          </div>
+          {(holiday.keyDates||(du>0&&du<=30)||isNow) && <div style={{display:"flex",gap:8,alignItems:"center",marginTop:2}}>
+            {holiday.keyDates && <span style={{fontSize:10,color:"#8B7BB5"}}>📅 {holiday.keyDates}</span>}
+            {du>0&&du<=30 && <span style={{fontSize:10,color:du<=7?"#C00":"#ED7D31",fontWeight:600}}>{du===1?"Tomorrow":"In "+du+" days"}</span>}
+            {isNow && <span style={{fontSize:10,color:"#70AD47",fontWeight:600}}>Happening now</span>}
+          </div>}
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+          {alloc>0 && <div style={{display:"flex",alignItems:"center",gap:5}}>
+            <span style={{fontSize:16,fontWeight:800,color:"#4A8C62"}}>{eo}</span><span style={{color:"#DDD",fontSize:12}}>:</span><span style={{fontSize:16,fontWeight:800,color:"#C67A3C"}}>{ee}</span>
+          </div>}
+          <span className={"chevron"+(open?" open":"")}>▾</span>
+        </div>
+      </div>
+
+      {open && <div className="card-body">
+        <div className="info-box">
+          <div><strong style={{color:"#444"}}>Term ends:</strong> {holiday.termEnds}</div>
+          <div><strong style={{color:"#444"}}>School holiday:</strong> {holiday.schoolHol}</div>
+          <div><strong style={{color:"#444"}}>Children available:</strong> {fmtMed(holiday.availStart)} PM → {fmtMed(holiday.availEnd)} ({holiday.totalNights} nights)</div>
+          <div><strong style={{color:"#444"}}>School resumes:</strong> {holiday.schoolResumes}</div>
+        </div>
+
+        {locked&&agr && <div className="agreed-box">
+          <div style={{fontSize:11,fontWeight:700,color:"#1F4E79",textTransform:"uppercase",marginBottom:8}}>Previously Agreed ✓</div>
+          <div style={{display:"flex",gap:14,alignItems:"center"}}>
+            <div><span style={{fontSize:18,fontWeight:800,color:"#4A8C62"}}>{agr.omar}</span> <span style={{fontSize:9,color:"#888"}}>Omar</span></div>
+            <div><span style={{fontSize:18,fontWeight:800,color:"#C67A3C"}}>{agr.emma}</span> <span style={{fontSize:9,color:"#888"}}>Emma</span></div>
+            <div style={{flex:1}}><Bar omar={agr.omar} emma={agr.emma} total={agr.omar+agr.emma} /></div>
+          </div>
+          {(agr.omarDates||agr.emmaDates) && <div style={{marginTop:8,fontSize:11,lineHeight:1.6}}>
+            {agr.omarDates && <div style={{color:"#4A8C62"}}><strong>Omar:</strong> {agr.omarDates}</div>}
+            {agr.emmaDates && <div style={{color:"#C67A3C"}}><strong>Emma:</strong> {agr.emmaDates}</div>}
+          </div>}
+          {agr.notes && <div style={{fontSize:11,color:"#555",marginTop:6,fontStyle:"italic"}}>{agr.notes}</div>}
+        </div>}
+
+        {partial&&!agr && <div className="partial-box">
+          <div style={{fontSize:11,fontWeight:700,color:"#7F5F00",marginBottom:3}}>PARTIALLY AGREED</div>
+          <div style={{fontSize:12,color:"#666"}}>{partial.note}</div>
+          {partial.omarDates && <div style={{fontSize:11,color:"#4A8C62",marginTop:4}}><strong>Omar:</strong> {partial.omarDates}</div>}
+        </div>}
+
+        {!locked&&data&&data.agreement && <div className="agreed-box">
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+            <span style={{fontSize:11,fontWeight:700,color:"#1F4E79",textTransform:"uppercase"}}>Agreed ✓</span>
+            <span style={{fontSize:10,color:"#8BA8CC"}}>{new Date(data.agreement.agreedAt).toLocaleDateString("en-GB")}</span>
+          </div>
+          <div style={{display:"flex",gap:14,alignItems:"center"}}>
+            <div><span style={{fontSize:18,fontWeight:800,color:"#4A8C62"}}>{data.agreement.omar}</span> <span style={{fontSize:9,color:"#888"}}>Omar</span></div>
+            <div><span style={{fontSize:18,fontWeight:800,color:"#C67A3C"}}>{data.agreement.emma}</span> <span style={{fontSize:9,color:"#888"}}>Emma</span></div>
+            <div style={{flex:1}}><Bar omar={data.agreement.omar} emma={data.agreement.emma} total={data.agreement.omar+data.agreement.emma} /></div>
+          </div>
+          {(data.agreement.omarDates||data.agreement.emmaDates) && <div style={{marginTop:8,fontSize:11,lineHeight:1.6}}>
+            {data.agreement.omarDates && <div style={{color:"#4A8C62"}}><strong>Omar:</strong> {data.agreement.omarDates}</div>}
+            {data.agreement.emmaDates && <div style={{color:"#C67A3C"}}><strong>Emma:</strong> {data.agreement.emmaDates}</div>}
+          </div>}
+        </div>}
+
+        {!locked&&!(data&&data.agreement) && <div>
+          {otherP && <ProposalBox who={other} proposal={otherP} isMe={false} onAgree={accept} />}
+          {myP&&!drafting && <ProposalBox who={me} proposal={myP} isMe={true} onDelete={deleteMyP} />}
+          {!otherP&&!myP&&!drafting && <div className="empty-state"><div style={{fontSize:13,color:"#BBB"}}>No proposals yet</div></div>}
+        </div>}
+
+        {!locked&&!(data&&data.agreement)&&drafting && <div className="draft-box">
+          <div style={{fontSize:11,fontWeight:700,color:"#1F4E79",marginBottom:12,textTransform:"uppercase"}}>
+            {myP?"Update "+nm(me)+"'s proposal":otherP?nm(me)+"'s counter-proposal":nm(me)+"'s proposal"}
+          </div>
+          <div style={{display:"flex",gap:12,alignItems:"flex-end",flexWrap:"wrap",marginBottom:10}}>
+            <div><label style={{fontSize:10,fontWeight:700,color:"#4A8C62",display:"block",marginBottom:4}}>OMAR NIGHTS</label>
+            <input type="number" min={0} max={holiday.totalNights} value={dO} onChange={function(e){setDO(e.target.value);}} className="night-input omar" /></div>
+            <div><label style={{fontSize:10,fontWeight:700,color:"#C67A3C",display:"block",marginBottom:4}}>EMMA NIGHTS</label>
+            <input type="number" min={0} max={holiday.totalNights} value={dE} onChange={function(e){setDE(e.target.value);}} className="night-input emma" /></div>
+            <span style={{fontSize:11,color:"#AAA",paddingBottom:8}}>of {holiday.totalNights}</span>
+          </div>
+          <div style={{marginBottom:8}}>
+            <label style={{fontSize:10,fontWeight:700,color:"#4A8C62",display:"block",marginBottom:4}}>OMAR'S DATES & HANDOVER TIMES</label>
+            <input type="text" value={dOD} onChange={function(e){setDOD(e.target.value);}} placeholder="e.g. Fri 27 Mar 1.10pm → Wed 1 Apr 6pm" className="text-input omar" />
+          </div>
+          <div style={{marginBottom:8}}>
+            <label style={{fontSize:10,fontWeight:700,color:"#C67A3C",display:"block",marginBottom:4}}>EMMA'S DATES & HANDOVER TIMES</label>
+            <input type="text" value={dED} onChange={function(e){setDED(e.target.value);}} placeholder="e.g. Wed 1 Apr 6pm → Sun 12 Apr" className="text-input emma" />
+          </div>
+          <textarea value={dN} onChange={function(e){setDN(e.target.value);}} placeholder="Additional notes — arrangements, handover details, etc." className="text-input notes" />
+          <div style={{display:"flex",gap:8,marginTop:10}}>
+            <button className="btn primary" onClick={submit}>{myP?"Update":"Submit"} proposal</button>
+            <button className="btn" onClick={function(){setDrafting(false);}}>Cancel</button>
+          </div>
+        </div>}
+
+        {!locked&&!(data&&data.agreement)&&!drafting && <button className={myP?"btn outline":"btn primary"} onClick={startDraft}>
+          {myP?"Revise "+nm(me)+"'s proposal":otherP?nm(me)+"'s counter-proposal":"Propose a split"}
+        </button>}
+      </div>}
+    </div>
+  );
+}
+
+function TermDatesPanel({termDates}) {
+  var years = ["2025/26","2026/27"];
+  return (
+    <div style={{background:"#fff",borderRadius:14,padding:16,border:"1px solid #E8E8E8"}}>
+      <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>Keston CE Primary — Term Dates</h3>
+      <p style={{fontSize:11,color:"#AAA",margin:"0 0 14px"}}>Official school calendar dates.</p>
+      {years.map(function(y){return (
+        <div key={y} style={{marginBottom:16}}>
+          <div style={{fontSize:12,fontWeight:700,color:"#1F4E79",marginBottom:6,padding:"4px 8px",background:"#D6E4F0",borderRadius:6}}>{y}</div>
+          {termDates.filter(function(t){return t.year===y;}).map(function(t){return (
+            <div key={t.id} className={"term-row "+t.type}>
+              <span style={{fontSize:11,fontWeight:t.type==="holiday"?700:400,flex:"1 1 140px"}}>{t.period}</span>
+              <span style={{fontSize:10,color:"#888",whiteSpace:"nowrap"}}>{fmtShort(t.start)}{t.end&&t.end!==t.start?" → "+fmtShort(t.end):""}</span>
+            </div>
+          );})}
+        </div>
+      );})}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════
+// MAIN APP
+// ══════════════════════════════════════════════════
+function App() {
+  var [me,setMe] = useState(null);
+  var [allData,setAllData] = useState({});
+  var [loaded,setLoaded] = useState(false);
+  var [saving,setSaving] = useState(false);
+  var [lastSaved,setLastSaved] = useState(null);
+  var [filter,setFilter] = useState("all");
+  var [tab,setTab] = useState("holidays");
+  var nextHoliday = useMemo(function(){return getNextHoliday();},[]);
+
+  // Load and listen to Firebase
+  useEffect(function(){
+    var unsub = null;
+    async function init(){
+      // Seed Emma's proposals into initial state
+      var initial = {};
+      Object.keys(EMMA_SEED).forEach(function(id){
+        initial[id] = {proposals:{emma:Object.assign({},EMMA_SEED[id],{timestamp:"2026-03-06T17:30:00Z"})}};
+      });
+
+      // Try loading from Firebase
+      var saved = await fbGet("holidayPlanner");
+      if(saved){
+        // Merge: saved data takes precedence over seed
+        Object.keys(initial).forEach(function(id){
+          if(!saved[id]) saved[id] = initial[id];
+          else if(!saved[id].proposals || !saved[id].proposals.emma) {
+            saved[id].proposals = Object.assign({},saved[id].proposals||{},initial[id].proposals);
+          }
+        });
+        setAllData(saved);
+      } else {
+        setAllData(initial);
+      }
+      setLoaded(true);
+
+      // Listen for real-time updates
+      unsub = fbListen("holidayPlanner", function(val){
+        if(val) setAllData(val);
+      });
+    }
+    init();
+    return function(){ if(unsub) unsub(); };
+  },[]);
+
+  function handleSave(id, hd){
+    setAllData(function(prev){
+      var n = Object.assign({},prev);
+      n[id] = hd;
+      setSaving(true);
+      fbSet("holidayPlanner",n).then(function(){
+        setLastSaved(new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}));
+        setSaving(false);
+      });
+      return n;
+    });
+  }
+
+  function computeAgreed(yf){
+    var tO=0,tE=0,tN=0,tA=0;
+    var list=yf==="all"?HOLIDAYS:HOLIDAYS.filter(function(h){return h.year===yf;});
+    list.forEach(function(h){tN+=h.totalNights;var d=allData[h.id];var a=(d&&d.agreement)||h.agreed;
+      if(a){tO+=a.omar;tE+=a.emma;tA+=a.omar+a.emma;}else if(h.partialAgreed){tO+=h.partialAgreed.omar;tA+=h.partialAgreed.omar;}});
+    return{tO:tO,tE:tE,tN:tN,tA:tA,unal:tN-tA};
+  }
+  function computeProposed(yf){
+    var tO=0,tE=0,tN=0,tA=0;
+    var list=yf==="all"?HOLIDAYS:HOLIDAYS.filter(function(h){return h.year===yf;});
+    list.forEach(function(h){tN+=h.totalNights;var d=allData[h.id];var a=(d&&d.agreement)||h.agreed;
+      if(a){tO+=a.omar;tE+=a.emma;tA+=a.omar+a.emma;}
+      else if(h.partialAgreed){tO+=h.partialAgreed.omar;tA+=h.partialAgreed.omar;var p=d&&d.proposals&&(d.proposals.omar||d.proposals.emma);if(p&&p.emma){tE+=p.emma;tA+=p.emma;}}
+      else{var p2=d&&d.proposals&&(d.proposals.omar||d.proposals.emma);if(p2){tO+=(p2.omar||0);tE+=(p2.emma||0);tA+=(p2.omar||0)+(p2.emma||0);}}});
+    return{tO:tO,tE:tE,tN:tN,tA:tA,unal:tN-tA};
+  }
+
+  var agreed = computeAgreed(filter);
+  var proposed = computeProposed(filter);
+  var fil = filter==="all"?HOLIDAYS:HOLIDAYS.filter(function(h){return h.year===filter;});
+
+  if(!loaded) return <div style={{display:"flex",justifyContent:"center",alignItems:"center",height:"100vh",fontFamily:"system-ui"}}><span style={{color:"#AAA"}}>Loading...</span></div>;
+
+  // Not configured warning
+  var notConfigured = FIREBASE_CONFIG.apiKey === "YOUR_API_KEY";
+
+  if(!me) return (
+    <div className="landing" style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif",background:"linear-gradient(160deg,#F5F7FA,#E8ECF2)"}}>
+      <div style={{maxWidth:420}}>
+        <h1 style={{fontSize:24,fontWeight:800,margin:"0 0 4px"}}>School Holiday Planner</h1>
+        <p style={{fontSize:13,color:"#999",margin:"0 0 6px"}}>Keston CE Primary — 2025/26 & 2026/27</p>
+        <p style={{fontSize:12,color:"#888",margin:"0 0 24px"}}>{fmtDate(TODAY)}</p>
+        {notConfigured && <div style={{padding:"10px 14px",borderRadius:8,background:"#FFF2CC",border:"1px solid #ED7D31",marginBottom:16,fontSize:12,color:"#7F5F00"}}>⚠ Firebase not configured — data won't sync between devices. See setup instructions.</div>}
+        {nextHoliday && <div style={{padding:"10px 16px",borderRadius:10,background:"#DDEBF7",border:"1px solid rgba(68,114,196,0.5)",marginBottom:24,display:"inline-block"}}>
+          <span style={{fontSize:12,color:"#1F4E79",fontWeight:600}}>Next holiday: <strong>{nextHoliday.name}</strong> ({daysUntil(nextHoliday.availStart)<=0?"now":daysUntil(nextHoliday.availStart)+" days"})</span>
+        </div>}
+        <p style={{fontSize:14,color:"#666",marginBottom:20}}>Who are you?</p>
+        <div style={{display:"flex",gap:16,justifyContent:"center"}}>
+          <button className="who-btn omar" onClick={function(){setMe("omar");}}>Omar</button>
+          <button className="who-btn emma" onClick={function(){setMe("emma");}}>Emma</button>
+        </div>
+        <p style={{fontSize:11,color:"#CCC",marginTop:20}}>Both parents can propose, counter-propose, and agree.<br/>All changes sync automatically.</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="banner">
+        <div><span>Today: </span><strong>{fmtDate(TODAY)}</strong></div>
+        {nextHoliday && <div><span>Next holiday: </span><strong>{nextHoliday.name}</strong> <span style={{fontSize:11,color:"#8BB8DE"}}>({daysUntil(nextHoliday.availStart)<=0?"now":daysUntil(nextHoliday.availStart)+" days"})</span></div>}
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:10}}>{saving?"Saving...":lastSaved||""}</span>
+          <button onClick={function(){setMe(null);}} style={{padding:"3px 10px",borderRadius:7,fontSize:11,fontWeight:700,background:me==="omar"?"#F0FAF3":"#FEF6EF",border:"none",color:me==="omar"?"#4A8C62":"#C67A3C",cursor:"pointer"}}>{nm(me)} ✕</button>
+        </div>
+      </div>
+
+      <div className="container">
+        <h1>Holiday Planner</h1>
+
+        <div className="btn-group">
+          <button className={"btn"+(tab==="holidays"?" active":"")} onClick={function(){setTab("holidays");}}>Holidays</button>
+          <button className={"btn"+(tab==="termdates"?" active":"")} onClick={function(){setTab("termdates");}}>Term Dates</button>
+        </div>
+
+        {tab==="holidays" && <div>
+          <div className="btn-group">
+            {["all","2025/26","2026/27"].map(function(y){return <button key={y} className={"btn"+(filter===y?" active":"")} onClick={function(){setFilter(y);}}>{y==="all"?"All":y}</button>;})}
+          </div>
+
+          <div className="splits">
+            <SplitBox label={"Agreed split"+(filter!=="all"?" — "+filter:"")} tO={agreed.tO} tE={agreed.tE} tA={agreed.tA} unal={agreed.unal} color="#4472C4" />
+            <SplitBox label={"If all proposals accepted"+(filter!=="all"?" — "+filter:"")} tO={proposed.tO} tE={proposed.tE} tA={proposed.tA} unal={proposed.unal} color="#70AD47" />
+          </div>
+
+          {fil.map(function(h){return <HolidayCard key={h.id} holiday={h} me={me} data={allData[h.id]||{}} onSave={handleSave} isNext={nextHoliday&&nextHoliday.id===h.id} />;})}
+        </div>}
+
+        {tab==="termdates" && <TermDatesPanel termDates={TERM_DATES} />}
+
+        <div style={{marginTop:20,textAlign:"center",fontSize:10,color:"#CCC",lineHeight:1.6}}>
+          <p>Keston CE Primary confirmed term dates (2025-26 and revised 2026-27).</p>
+          <p>All changes sync automatically between both parents.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>
