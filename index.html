@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>School Holiday Planner — Keston CE Primary</title>
+<title>Joint Holiday Planner</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: linear-gradient(180deg, #F5F7FA, #E8ECF2); min-height: 100vh; color: #333; }
@@ -58,6 +58,26 @@
   .term-row.term { background: #fff; border: 1px solid #E8E8E8; }
   .term-row.inset { background: #E2EFDA; border: 1px solid #A3C985; }
   .term-row.event { background: #F0E6FF; border: 1px solid #C4A8E0; }
+  .cal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .cal-month { background: #fff; border-radius: 10px; padding: 10px; border: 1px solid #E8E8E8; }
+  .cal-month-title { font-size: 13px; font-weight: 700; color: #1F4E79; margin-bottom: 6px; text-align: center; }
+  .cal-days-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; margin-bottom: 2px; }
+  .cal-day-label { font-size: 9px; font-weight: 700; color: #AAA; text-align: center; padding: 2px 0; }
+  .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
+  .cal-day { font-size: 10px; text-align: center; padding: 3px 0; border-radius: 3px; cursor: default; position: relative; }
+  .cal-day.empty { }
+  .cal-day.term { background: #F5F5F5; color: #999; }
+  .cal-day.holiday { background: #FFF2CC; color: #7F5F00; }
+  .cal-day.inset { background: #E2EFDA; color: #375623; }
+  .cal-day.event { background: #F0E6FF; color: #6B4D8A; }
+  .cal-day.omar { background: #C6EFCE; color: #1E5631; font-weight: 700; }
+  .cal-day.emma { background: #FCE4D6; color: #7F3B0C; font-weight: 700; }
+  .cal-day.partial { background: #DDEBF7; color: #1F4E79; }
+  .cal-day.today { outline: 2px solid #4472C4; outline-offset: -1px; font-weight: 800; }
+  .cal-day.weekend { }
+  .cal-legend { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .cal-legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #666; }
+  .cal-legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
   .landing { display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; padding: 20px; }
   .who-btn { width: 140px; padding: 22px 0; border-radius: 14px; cursor: pointer; font-size: 16px; font-weight: 700; }
   .who-btn.omar { border: 2px solid #6BAF82; background: #F0FAF3; color: #4A8C62; }
@@ -447,6 +467,97 @@ function TermDatesPanel({termDates}) {
   );
 }
 
+function CalendarView({allData}) {
+  // Build a map of date -> type for the full period
+  function getDateType(dateStr) {
+    // Check holidays first (agreed allocations)
+    for (var i = 0; i < HOLIDAYS.length; i++) {
+      var h = HOLIDAYS[i];
+      if (dateStr >= h.availStart && dateStr <= h.availEnd) {
+        var d = allData[h.id];
+        var agr = (d && d.agreement) || h.agreed;
+        if (agr) {
+          // Split days: first portion Omar, second Emma
+          var dayIndex = Math.ceil((new Date(dateStr+"T12:00:00") - new Date(h.availStart+"T12:00:00")) / 86400000);
+          var totalDays = Math.ceil((new Date(h.availEnd+"T12:00:00") - new Date(h.availStart+"T12:00:00")) / 86400000) + 1;
+          var omarDays = Math.round((agr.omar / (agr.omar + agr.emma)) * totalDays);
+          return dayIndex < omarDays ? "omar" : "emma";
+        }
+        if (h.partialAgreed) return "partial";
+        // Check if there's a proposal
+        var prop = d && d.proposals && (d.proposals.omar || d.proposals.emma);
+        if (prop) return "partial";
+        return "holiday";
+      }
+    }
+    // Check term dates for inset/event
+    for (var j = 0; j < TERM_DATES.length; j++) {
+      var t = TERM_DATES[j];
+      if (dateStr >= t.start && dateStr <= t.end) {
+        if (t.type === "inset") return "inset";
+        if (t.type === "event") return "event";
+      }
+    }
+    // Check if weekend
+    var dow = new Date(dateStr+"T12:00:00").getDay();
+    if (dow === 0 || dow === 6) return "term"; // weekend during term
+    return "term";
+  }
+
+  function renderMonth(year, month) {
+    var firstDay = new Date(year, month, 1);
+    var daysInMonth = new Date(year, month + 1, 0).getDate();
+    var startDow = firstDay.getDay(); // 0=Sun
+    // Shift to Mon start: Mon=0, Tue=1, ... Sun=6
+    var startOffset = (startDow + 6) % 7;
+    var monthName = firstDay.toLocaleDateString("en-GB", {month:"long", year:"numeric"});
+
+    var cells = [];
+    for (var i = 0; i < startOffset; i++) {
+      cells.push(React.createElement("div", {key:"e"+i, className:"cal-day empty"}));
+    }
+    for (var d = 1; d <= daysInMonth; d++) {
+      var ds = year + "-" + String(month+1).padStart(2,"0") + "-" + String(d).padStart(2,"0");
+      var type = getDateType(ds);
+      var isToday = ds === TODAY;
+      var cls = "cal-day " + type + (isToday ? " today" : "");
+      cells.push(React.createElement("div", {key:d, className:cls, title:ds}, d));
+    }
+
+    return React.createElement("div", {key:monthName, className:"cal-month"},
+      React.createElement("div", {className:"cal-month-title"}, monthName),
+      React.createElement("div", {className:"cal-days-header"},
+        ["M","T","W","T","F","S","S"].map(function(d,i){
+          return React.createElement("div",{key:i,className:"cal-day-label"},d);
+        })
+      ),
+      React.createElement("div", {className:"cal-days"}, cells)
+    );
+  }
+
+  // Render from April 2026 to August 2027
+  var months = [];
+  for (var y = 2026; y <= 2027; y++) {
+    var startM = y === 2026 ? 3 : 0; // April 2026, Jan 2027
+    var endM = y === 2027 ? 8 : 11;  // Aug 2027, Dec 2026
+    for (var m = startM; m <= endM; m++) {
+      months.push(renderMonth(y, m));
+    }
+  }
+
+  return React.createElement("div", null,
+    React.createElement("div", {className:"cal-legend"},
+      [{c:"#C6EFCE",l:"Omar"},{c:"#FCE4D6",l:"Emma"},{c:"#DDEBF7",l:"Proposed/Partial"},{c:"#FFF2CC",l:"Holiday (unallocated)"},{c:"#E2EFDA",l:"Inset"},{c:"#F0E6FF",l:"School event"},{c:"#F5F5F5",l:"Term"}].map(function(item){
+        return React.createElement("div",{key:item.l,className:"cal-legend-item"},
+          React.createElement("div",{className:"cal-legend-swatch",style:{background:item.c}}),
+          item.l
+        );
+      })
+    ),
+    React.createElement("div", {className:"cal-grid"}, months)
+  );
+}
+
 // ══════════════════════════════════════════════════
 // MAIN APP
 // ══════════════════════════════════════════════════
@@ -537,8 +648,7 @@ function App() {
   if(!me) return (
     <div className="landing" style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif",background:"linear-gradient(160deg,#F5F7FA,#E8ECF2)"}}>
       <div style={{maxWidth:420}}>
-        <h1 style={{fontSize:24,fontWeight:800,margin:"0 0 4px"}}>School Holiday Planner</h1>
-        <p style={{fontSize:13,color:"#999",margin:"0 0 6px"}}>Keston CE Primary — 2025/26 & 2026/27</p>
+        <h1 style={{fontSize:24,fontWeight:800,margin:"0 0 4px"}}>Joint Holiday Planner</h1>
         <p style={{fontSize:12,color:"#888",margin:"0 0 24px"}}>{fmtDate(TODAY)}</p>
         {notConfigured && <div style={{padding:"10px 14px",borderRadius:8,background:"#FFF2CC",border:"1px solid #ED7D31",marginBottom:16,fontSize:12,color:"#7F5F00"}}>⚠ Firebase not configured — data won't sync between devices. See setup instructions.</div>}
         {nextHoliday && <div style={{padding:"10px 16px",borderRadius:10,background:"#DDEBF7",border:"1px solid rgba(68,114,196,0.5)",marginBottom:24,display:"inline-block"}}>
@@ -566,10 +676,11 @@ function App() {
       </div>
 
       <div className="container">
-        <h1>Holiday Planner</h1>
+        <h1>Joint Holiday Planner</h1>
 
         <div className="btn-group">
           <button className={"btn"+(tab==="holidays"?" active":"")} onClick={function(){setTab("holidays");}}>Holidays</button>
+          <button className={"btn"+(tab==="calendar"?" active":"")} onClick={function(){setTab("calendar");}}>Calendar</button>
           <button className={"btn"+(tab==="termdates"?" active":"")} onClick={function(){setTab("termdates");}}>Term Dates</button>
         </div>
 
@@ -587,6 +698,8 @@ function App() {
         </div>}
 
         {tab==="termdates" && <TermDatesPanel termDates={TERM_DATES} />}
+
+        {tab==="calendar" && <CalendarView allData={allData} />}
 
         <div style={{marginTop:20,textAlign:"center",fontSize:10,color:"#CCC",lineHeight:1.6}}>
           <p>Keston CE Primary confirmed term dates (2025-26 and revised 2026-27).</p>
