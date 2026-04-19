@@ -197,7 +197,7 @@ const HOLIDAYS = [
 const EMMA_SEED = {
   autht2627:{omar:7,emma:9,notes:"1st week (19–25 Oct) Omar, 2nd week (26 Oct–1 Nov) Emma.",omarDates:"Fri 16 Oct PM → Fri 23 Oct",emmaDates:"Fri 23 Oct → Sun 1 Nov"},
   xmas2627:{omar:8,emma:8,notes:"Omar's alternating weekend (18-20 Dec) + 2nd week (28 Dec-3 Jan). Emma: 1st week (21-27 Dec) per her email.",omarDates:"Fri 18 Dec 1.10pm \u2192 Sun 20 Dec 6pm + Mon 28 Dec 6pm \u2192 Sun 3 Jan 6pm",emmaDates:"Sun 20 Dec 6pm \u2192 Mon 28 Dec 6pm"},
-  febht27:{omar:6,emma:4,notes:"1st half (12–18 Feb 8am) Omar, 2nd half (19–22 Feb) Emma.",omarDates:"Thu 11 Feb PM → Wed 17 Feb",emmaDates:"Wed 18 Feb → Sun 21 Feb"},
+  febht27:{omar:6,emma:4,notes:"Thu 11 Feb night is Emma's (regular pattern). Omar: Fri 12 Feb (inset) to Wed 18 Feb 8am. Emma: Thu 11 Feb night + Wed 18 Feb to Sun 21 Feb.",omarDates:"Fri 12 Feb \u2192 Wed 18 Feb 8am",emmaDates:"Thu 11 Feb PM \u2192 Fri 12 Feb + Wed 18 Feb 8am \u2192 Sun 21 Feb 6pm"},
   easter27:{omar:6,emma:9,notes:"1st half (26 Mar – 1 Apr) Omar, 2nd half (1 Apr – 9 Apr) Emma.",omarDates:"Thu 25 Mar 1.10pm → Wed 31 Mar",emmaDates:"Wed 31 Mar → Fri 9 Apr 6pm"},
   mayht27:{omar:4,emma:5,notes:"1st half (28 May – 2 Jun 6pm) Emma, 2nd half (2 Jun – 6 Jun 6pm) Omar.",omarDates:"Tue 2 Jun 6pm → Sun 6 Jun",emmaDates:"Fri 28 May PM → Tue 2 Jun 6pm"},
 };
@@ -511,7 +511,8 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
               <button className="btn" onClick={function(){setDrafting(false);}}>Cancel</button>
             </div>
           </div> : <div>
-            <div style={{fontSize:10,color:"#888",marginBottom:10}}>Propose the full split — set dates for both Omar and Emma.</div>
+            <div style={{fontSize:10,color:"#888",marginBottom:6}}>Propose the full split — set dates for both Omar and Emma.</div>
+            <div style={{fontSize:9,color:"#4472C4",marginBottom:10,padding:"4px 8px",borderRadius:6,background:"#DDEBF7"}}>Regular pattern: Mon/Tue/Thu nights = Emma · Wed night = Omar · Alternating weekends (Fri 6pm–Sun 6pm). Applies at holiday boundaries.</div>
             <div style={{fontSize:10,fontWeight:700,color:"#1F4E79",marginBottom:4}}>{nm(me).toUpperCase()+"'S DATES"}</div>
             <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",marginBottom:6}}>
               <label style={{fontSize:10,color:"#888"}}>From</label>
@@ -781,6 +782,10 @@ function CalendarView({allData, selectedHoliday}) {
       if (evtName) tt += " + " + evtName;
       return {type: wkPar+"-wknd", tooltip: tt, holidayId: null, hasEvent: !!evtName};
     }
+    // Weekday pattern during term time (not weekends, those are handled above)
+    var termDow = new Date(dateStr+"T12:00:00").getDay();
+    if (termDow === 3) return {type:"term", tooltip:"Term time \u00b7 Wed night = Omar", holidayId: null, hasEvent: false};
+    if (termDow === 1 || termDow === 2 || termDow === 4) return {type:"term", tooltip:"Term time \u00b7 " + ["","Mon","Tue","","Thu"][termDow] + " night = Emma", holidayId: null, hasEvent: false};
     return {type:"term", tooltip:"Term time", holidayId: null, hasEvent: false};
   }
 
@@ -1024,6 +1029,11 @@ function App() {
         {/* Year filter */}
         {tab!=="termdates" && <div className="btn-group">
           {["all","2025/26","2026/27"].map(function(y){return <button key={y} className={"btn"+(filter===y?" active":"")} onClick={function(){setFilter(y);}}>{y==="all"?"All":y}</button>;})}
+        </div>}
+
+        {/* Regular weekly pattern note */}
+        {tab!=="termdates" && <div style={{fontSize:9,color:"#1F4E79",padding:"5px 10px",borderRadius:6,background:"#DDEBF7",marginBottom:10,lineHeight:1.5}}>
+          <strong>Regular weekly pattern:</strong> Mon/Tue/Thu nights = Emma · Wed night = Omar · Alternating weekends Fri 6pm–Sun 6pm (Emma starts 17 Apr 2026). This applies at holiday boundaries — e.g. Thu night at start of a holiday = Emma, Sun night at end = Emma.
         </div>}
 
         {/* Split summary */}
