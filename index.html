@@ -74,7 +74,8 @@
   .cal-day.emma { background: #FCE4D6; color: #7F3B0C; font-weight: 700; }
   .cal-day.partial { background: #DDEBF7; color: #1F4E79; }
   .cal-day.today { outline: 2px solid #4472C4; outline-offset: -1px; font-weight: 800; }
-  .cal-day.weekend { }
+  .cal-day.dimmed { opacity: 0.2; }
+  .cal-day { position: relative; }
   .cal-legend { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
   .cal-legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #666; }
   .cal-legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
@@ -308,7 +309,7 @@ function ProposalBox({who,proposal,isMe,onAgree,onDelete}) {
   );
 }
 
-function HolidayCard({holiday,me,data,onSave,isNext}) {
+function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected}) {
   var [open,setOpen] = useState(false);
   var [drafting,setDrafting] = useState(false);
   var [dO,setDO] = useState(""); var [dE,setDE] = useState("");
@@ -356,11 +357,11 @@ function HolidayCard({holiday,me,data,onSave,isNext}) {
     var nd=Object.assign({},data,{proposals:np});delete nd.agreement;onSave(holiday.id,nd);
   }
 
-  var cardClass = "card"+(isNext?" next":"")+(isPast&&!locked?" past":"");
+  var cardClass = "card"+(isNext?" next":"")+(isPast&&!locked?" past":"")+(isSelected?" next":"");
 
   return (
-    <div className={cardClass} style={{borderLeft:"4px solid "+sc2}}>
-      <div className="card-header" onClick={function(){setOpen(!open);}}>
+    <div className={cardClass} style={{borderLeft:"4px solid "+sc2,outline:isSelected?"2px solid #4472C4":"none",outlineOffset:isSelected?"-1px":"0"}}>
+      <div className="card-header" onClick={function(){setOpen(!open); if(onSelect)onSelect();}}>
         <div style={{flex:1,minWidth:0}}>
           <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
             {isNext && <span className="badge" style={{background:"#4472C4",color:"#fff"}}>NEXT HOLIDAY</span>}
@@ -498,7 +499,8 @@ function TermDatesPanel({termDates}) {
   return (
     <div style={{background:"#fff",borderRadius:14,padding:16,border:"1px solid #E8E8E8"}}>
       <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>Keston CE Primary — Term Dates</h3>
-      <p style={{fontSize:11,color:"#AAA",margin:"0 0 14px"}}>Official school calendar dates. Verified from school documents only.</p>
+      <p style={{fontSize:11,color:"#AAA",margin:"0 0 2px"}}>Official school calendar dates. Verified from school documents only.</p>
+      <p style={{fontSize:10,color:"#4472C4",margin:"0 0 14px",fontStyle:"italic"}}>Sources: Dates for Diaries Keston 2025-2026 V4 · Term Dates 2025-2026 · Revised Term Dates 2026-2027 (Mrs Ardern, 9 Feb 2026)</p>
       {years.map(function(y){return (
         <div key={y} style={{marginBottom:16}}>
           <div style={{fontSize:12,fontWeight:700,color:"#1F4E79",marginBottom:6,padding:"4px 8px",background:"#D6E4F0",borderRadius:6}}>{y}</div>
@@ -513,105 +515,109 @@ function TermDatesPanel({termDates}) {
 
       <div className="pdf-upload">
         <div style={{fontSize:12,fontWeight:700,color:"#1F4E79",marginBottom:6}}>📄 Upload Keston Dates for Diaries</div>
-        <p style={{fontSize:11,color:"#888",margin:"0 0 8px"}}>Upload the latest PDF from Keston to extract dates and events.</p>
+        <p style={{fontSize:11,color:"#888",margin:"0 0 8px"}}>Upload the latest PDF from school to extract dates. Then copy the text and paste into Claude AI to intelligently update the calendar.</p>
         <input type="file" accept=".pdf" onChange={handlePdfUpload} />
         {pdfLoading && <p style={{fontSize:11,color:"#4472C4",marginTop:8}}>Reading PDF...</p>}
         {pdfText && <div>
-          <div style={{fontSize:11,fontWeight:700,color:"#375623",margin:"10px 0 4px"}}>Extracted text:</div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",margin:"10px 0 4px"}}>
+            <span style={{fontSize:11,fontWeight:700,color:"#375623"}}>Extracted text:</span>
+            <button onClick={function(){navigator.clipboard.writeText(pdfText).then(function(){alert("Copied! Now paste into Claude AI to parse the dates.");});}} style={{padding:"4px 12px",borderRadius:6,fontSize:11,fontWeight:700,background:"#4472C4",color:"#fff",border:"none",cursor:"pointer"}}>📋 Copy to clipboard</button>
+          </div>
           <div className="pdf-output">{pdfText}</div>
-          <p style={{fontSize:10,color:"#AAA",marginTop:6}}>Review the extracted dates above. Use this to verify or update the term dates and school events.</p>
+          <div style={{marginTop:8,padding:"8px 10px",borderRadius:8,background:"#DDEBF7",border:"1px solid #4472C480",fontSize:11,color:"#1F4E79",lineHeight:1.6}}>
+            <strong>To update dates with AI:</strong> Click "Copy to clipboard" above, then open <a href="https://claude.ai" target="_blank" style={{color:"#4472C4"}}>claude.ai</a> and paste the text with a prompt like: <em>"Extract all school dates and events from this Keston CE Primary document and list them with start date, end date, and type (term/holiday/inset/event)."</em>
+          </div>
         </div>}
       </div>
     </div>
   );
 }
 
-function CalendarView({allData}) {
-  // Build a map of date -> type for the full period
-  function getDateType(dateStr) {
-    // Check holidays first (agreed allocations)
+function CalendarView({allData, selectedHoliday}) {
+  var TOOLTIP_MAP = {omar:"Omar's time", emma:"Emma's time", partial:"Proposed / Partially agreed", holiday:"Holiday (unallocated)", inset:"Inset day (no school)", term:"Term time"};
+
+  function getDateInfo(dateStr) {
+    // Check holidays first
     for (var i = 0; i < HOLIDAYS.length; i++) {
       var h = HOLIDAYS[i];
       if (dateStr >= h.availStart && dateStr <= h.availEnd) {
         var d = allData[h.id];
         var agr = (d && d.agreement) || h.agreed;
         if (agr) {
-          // Split days: first portion Omar, second Emma
           var dayIndex = Math.ceil((new Date(dateStr+"T12:00:00") - new Date(h.availStart+"T12:00:00")) / 86400000);
           var totalDays = Math.ceil((new Date(h.availEnd+"T12:00:00") - new Date(h.availStart+"T12:00:00")) / 86400000) + 1;
           var omarDays = Math.round((agr.omar / (agr.omar + agr.emma)) * totalDays);
-          return dayIndex < omarDays ? "omar" : "emma";
+          var type = dayIndex < omarDays ? "omar" : "emma";
+          return {type: type, tooltip: TOOLTIP_MAP[type] + " — " + h.name, holidayId: h.id};
         }
-        if (h.partialAgreed) return "partial";
-        // Check if there's a proposal
+        if (h.partialAgreed) return {type:"partial", tooltip:"Partially agreed — " + h.name, holidayId: h.id};
         var prop = d && d.proposals && (d.proposals.omar || d.proposals.emma);
-        if (prop) return "partial";
-        return "holiday";
+        if (prop) return {type:"partial", tooltip:"Proposed — " + h.name, holidayId: h.id};
+        return {type:"holiday", tooltip:"Holiday (unallocated) — " + h.name, holidayId: h.id};
       }
     }
     // Check term dates for inset/event
     for (var j = 0; j < TERM_DATES.length; j++) {
       var t = TERM_DATES[j];
       if (dateStr >= t.start && dateStr <= t.end) {
-        if (t.type === "inset") return "inset";
-        if (t.type === "event") return "event";
+        if (t.type === "inset") return {type:"inset", tooltip:"Inset day: " + t.period, holidayId: null};
+        if (t.type === "event") return {type:"event", tooltip:"School event: " + t.period.replace(/^[^\w]*/,""), holidayId: null};
       }
     }
-    // Check if weekend
-    var dow = new Date(dateStr+"T12:00:00").getDay();
-    if (dow === 0 || dow === 6) return "term"; // weekend during term
-    return "term";
+    return {type:"term", tooltip:"Term time", holidayId: null};
+  }
+
+  // Get selected holiday date range for highlighting
+  var selStart = null, selEnd = null;
+  if (selectedHoliday) {
+    var sh = HOLIDAYS.find(function(h){return h.id === selectedHoliday;});
+    if (sh) { selStart = sh.availStart; selEnd = sh.availEnd; }
   }
 
   function renderMonth(year, month) {
     var firstDay = new Date(year, month, 1);
     var daysInMonth = new Date(year, month + 1, 0).getDate();
-    var startDow = firstDay.getDay(); // 0=Sun
-    // Shift to Mon start: Mon=0, Tue=1, ... Sun=6
-    var startOffset = (startDow + 6) % 7;
+    var startOffset = (firstDay.getDay() + 6) % 7;
     var monthName = firstDay.toLocaleDateString("en-GB", {month:"long", year:"numeric"});
-
     var cells = [];
     for (var i = 0; i < startOffset; i++) {
       cells.push(React.createElement("div", {key:"e"+i, className:"cal-day empty"}));
     }
     for (var d = 1; d <= daysInMonth; d++) {
       var ds = year + "-" + String(month+1).padStart(2,"0") + "-" + String(d).padStart(2,"0");
-      var type = getDateType(ds);
+      var info = getDateInfo(ds);
       var isToday = ds === TODAY;
-      var cls = "cal-day " + type + (isToday ? " today" : "");
-      cells.push(React.createElement("div", {key:d, className:cls, title:ds}, d));
+      var isDimmed = selectedHoliday && !(ds >= selStart && ds <= selEnd);
+      var cls = "cal-day " + info.type + (isToday ? " today" : "") + (isDimmed ? " dimmed" : "");
+      cells.push(React.createElement("div", {key:d, className:cls, title:info.tooltip}, d));
     }
-
     return React.createElement("div", {key:monthName, className:"cal-month"},
       React.createElement("div", {className:"cal-month-title"}, monthName),
       React.createElement("div", {className:"cal-days-header"},
-        ["M","T","W","T","F","S","S"].map(function(d,i){
-          return React.createElement("div",{key:i,className:"cal-day-label"},d);
-        })
+        ["M","T","W","T","F","S","S"].map(function(d,i){return React.createElement("div",{key:i,className:"cal-day-label"},d);})
       ),
       React.createElement("div", {className:"cal-days"}, cells)
     );
   }
 
-  // Render from April 2026 to August 2027
   var months = [];
   for (var y = 2026; y <= 2027; y++) {
-    var startM = y === 2026 ? 3 : 0; // April 2026, Jan 2027
-    var endM = y === 2027 ? 8 : 11;  // Aug 2027, Dec 2026
-    for (var m = startM; m <= endM; m++) {
-      months.push(renderMonth(y, m));
-    }
+    var startM = y === 2026 ? 3 : 0;
+    var endM = y === 2027 ? 8 : 11;
+    for (var m = startM; m <= endM; m++) { months.push(renderMonth(y, m)); }
   }
 
   return React.createElement("div", null,
     React.createElement("div", {className:"cal-legend"},
       [{c:"#C6EFCE",l:"Omar"},{c:"#FCE4D6",l:"Emma"},{c:"#DDEBF7",l:"Proposed/Partial"},{c:"#FFF2CC",l:"Holiday (unallocated)"},{c:"#E2EFDA",l:"Inset"},{c:"#F0E6FF",l:"School event"},{c:"#F5F5F5",l:"Term"}].map(function(item){
         return React.createElement("div",{key:item.l,className:"cal-legend-item"},
-          React.createElement("div",{className:"cal-legend-swatch",style:{background:item.c}}),
-          item.l
+          React.createElement("div",{className:"cal-legend-swatch",style:{background:item.c}}), item.l
         );
       })
+    ),
+    selectedHoliday && React.createElement("div", {style:{fontSize:11,color:"#4472C4",marginBottom:8,fontWeight:600}},
+      "Showing: " + (HOLIDAYS.find(function(h){return h.id===selectedHoliday;})||{}).name + " ",
+      React.createElement("button", {onClick:function(){/* need parent to clear */}, style:{fontSize:10,color:"#999",background:"none",border:"none",cursor:"pointer"}}, "")
     ),
     React.createElement("div", {className:"cal-grid"}, months)
   );
@@ -628,6 +634,8 @@ function App() {
   var [lastSaved,setLastSaved] = useState(null);
   var [filter,setFilter] = useState("all");
   var [tab,setTab] = useState("holidays");
+  var [selectedHoliday,setSelectedHoliday] = useState(null);
+  var [viewMode,setViewMode] = useState(window.innerWidth > 960 ? "desktop" : "mobile");
   var nextHoliday = useMemo(function(){return getNextHoliday();},[]);
 
   // Load and listen to Firebase
@@ -734,47 +742,58 @@ function App() {
         </div>
       </div>
 
-      <div className="container">
+      <div style={{maxWidth:viewMode==="desktop"?1200:700,margin:"0 auto",padding:"14px 12px 0",transition:"max-width 0.3s"}}>
         <h1>Joint Holiday Planner</h1>
 
-        {/* Desktop tabs - only show Term Dates toggle */}
-        <div className="btn-group hide-mobile">
-          <button className={"btn"+(tab!=="termdates"?" active":"")} onClick={function(){setTab("holidays");}}>Holidays & Calendar</button>
-          <button className={"btn"+(tab==="termdates"?" active":"")} onClick={function(){setTab("termdates");}}>Term Dates</button>
+        {/* View toggle */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+          <div>
+            {/* Desktop mode: two tabs */}
+            {viewMode==="desktop" && <div className="btn-group" style={{marginBottom:0}}>
+              <button className={"btn"+(tab!=="termdates"?" active":"")} onClick={function(){setTab("holidays");}}>Holidays & Calendar</button>
+              <button className={"btn"+(tab==="termdates"?" active":"")} onClick={function(){setTab("termdates");}}>Term Dates</button>
+            </div>}
+            {/* Mobile mode: three tabs */}
+            {viewMode==="mobile" && <div className="btn-group" style={{marginBottom:0}}>
+              <button className={"btn"+(tab==="holidays"?" active":"")} onClick={function(){setTab("holidays");}}>Holidays</button>
+              <button className={"btn"+(tab==="calendar"?" active":"")} onClick={function(){setTab("calendar");}}>Calendar</button>
+              <button className={"btn"+(tab==="termdates"?" active":"")} onClick={function(){setTab("termdates");}}>Term Dates</button>
+            </div>}
+          </div>
+          <div style={{display:"flex",gap:2,background:"#E8E8E8",borderRadius:6,padding:2}}>
+            <button onClick={function(){setViewMode("desktop");}} style={{padding:"3px 10px",borderRadius:5,fontSize:10,fontWeight:600,border:"none",cursor:"pointer",background:viewMode==="desktop"?"#fff":"transparent",color:viewMode==="desktop"?"#333":"#999"}}>⬛ Desktop</button>
+            <button onClick={function(){setViewMode("mobile");}} style={{padding:"3px 10px",borderRadius:5,fontSize:10,fontWeight:600,border:"none",cursor:"pointer",background:viewMode==="mobile"?"#fff":"transparent",color:viewMode==="mobile"?"#333":"#999"}}>📱 Mobile</button>
+          </div>
         </div>
 
-        {/* Mobile tabs - hidden on desktop */}
-        <div className="btn-group mobile-tabs">
-          <button className={"btn"+(tab==="holidays"?" active":"")} onClick={function(){setTab("holidays");}}>Holidays</button>
-          <button className={"btn"+(tab==="calendar"?" active":"")} onClick={function(){setTab("calendar");}}>Calendar</button>
-          <button className={"btn"+(tab==="termdates"?" active":"")} onClick={function(){setTab("termdates");}}>Term Dates</button>
-        </div>
-
-        {/* Year filter - shown when holidays or calendar visible */}
-        {(tab==="holidays"||tab==="calendar") && <div className="btn-group">
+        {/* Year filter */}
+        {tab!=="termdates" && <div className="btn-group">
           {["all","2025/26","2026/27"].map(function(y){return <button key={y} className={"btn"+(filter===y?" active":"")} onClick={function(){setFilter(y);}}>{y==="all"?"All":y}</button>;})}
         </div>}
 
-        {/* Split summary - shown when holidays visible */}
-        {(tab==="holidays"||tab==="calendar") && <div className="splits">
+        {/* Split summary */}
+        {tab!=="termdates" && <div className="splits">
           <SplitBox label={"Agreed split"+(filter!=="all"?" — "+filter:"")} tO={agreed.tO} tE={agreed.tE} tA={agreed.tA} unal={agreed.unal} color="#4472C4" />
           <SplitBox label={"If all proposals accepted"+(filter!=="all"?" — "+filter:"")} tO={proposed.tO} tE={proposed.tE} tA={proposed.tA} unal={proposed.unal} color="#70AD47" />
         </div>}
 
-        {/* Desktop: side-by-side calendar + holidays. Mobile: tab-switched */}
-        {tab!=="termdates" && <div className="desktop-main">
-          {/* Calendar panel */}
-          <div className={"desktop-left"+(tab==="calendar"?" show-mobile":"")}>
-            <CalendarView allData={allData} />
+        {/* Desktop: side-by-side calendar + holidays */}
+        {tab!=="termdates" && viewMode==="desktop" && <div style={{display:"flex",gap:16,alignItems:"flex-start"}}>
+          <div style={{flex:"1 1 340px",minWidth:280,position:"sticky",top:16,maxHeight:"calc(100vh - 32px)",overflowY:"auto"}}>
+            <CalendarView allData={allData} selectedHoliday={selectedHoliday} />
           </div>
-
-          {/* Holidays panel */}
-          <div className={"desktop-right"+(tab==="holidays"?" show-mobile":"")}>
-            {fil.map(function(h){return <HolidayCard key={h.id} holiday={h} me={me} data={allData[h.id]||{}} onSave={handleSave} isNext={nextHoliday&&nextHoliday.id===h.id} />;})}
+          <div style={{flex:"1 1 400px",minWidth:300}}>
+            {fil.map(function(h){return <HolidayCard key={h.id} holiday={h} me={me} data={allData[h.id]||{}} onSave={handleSave} isNext={nextHoliday&&nextHoliday.id===h.id} onSelect={function(){setSelectedHoliday(selectedHoliday===h.id?null:h.id);}} isSelected={selectedHoliday===h.id} />;})}
           </div>
         </div>}
 
-        {/* Term Dates tab - same on desktop and mobile */}
+        {/* Mobile: tab-switched */}
+        {tab!=="termdates" && viewMode==="mobile" && tab==="calendar" && <CalendarView allData={allData} selectedHoliday={selectedHoliday} />}
+        {tab!=="termdates" && viewMode==="mobile" && tab==="holidays" && <div>
+          {fil.map(function(h){return <HolidayCard key={h.id} holiday={h} me={me} data={allData[h.id]||{}} onSave={handleSave} isNext={nextHoliday&&nextHoliday.id===h.id} onSelect={function(){setSelectedHoliday(selectedHoliday===h.id?null:h.id);}} isSelected={selectedHoliday===h.id} />;})}
+        </div>}
+
+        {/* Term Dates tab */}
         {tab==="termdates" && <TermDatesPanel termDates={TERM_DATES} />}
 
         <div style={{marginTop:20,textAlign:"center",fontSize:10,color:"#CCC",lineHeight:1.6}}>
