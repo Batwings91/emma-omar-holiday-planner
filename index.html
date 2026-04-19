@@ -41,8 +41,8 @@
   .agreed-box { padding: 12px; border-radius: 10px; background: #DDEBF7; border: 1.5px solid #4472C4; margin-bottom: 10px; }
   .partial-box { padding: 10px; border-radius: 10px; background: #FFF8ED; border: 1.5px solid #ED7D31; margin-bottom: 10px; }
   .proposal-box { padding: 12px 14px; border-radius: 10px; margin-bottom: 8px; }
-  .proposal-box.omar { background: #F0FAF3; border: 1.5px solid #C6EFCE; }
-  .proposal-box.emma { background: #FEF6EF; border: 1.5px solid #FCE4D6; }
+  .proposal-box.omar { background: #F0FAF3; border: 2px solid #4A8C62; }
+  .proposal-box.emma { background: #FFF4EC; border: 2px solid #E8890C; }
   .draft-box { padding: 14px; border-radius: 10px; background: #FAFBFF; border: 1.5px solid #4472C4; margin-bottom: 10px; }
   .night-input { width: 54px; height: 34px; text-align: center; font-size: 15px; font-weight: 700; border-radius: 8px; font-family: inherit; outline: none; }
   .night-input.omar { border: 2px solid #6BAF82; background: #F0FAF3; }
@@ -286,7 +286,7 @@ function SplitBox({label,tO,tE,tA,unal,color}) {
       <div className="stat-row">
         <div className="stat" style={{background:"#F0FAF3",border:"1px solid #C6EFCE"}}><div className="stat-val" style={{color:"#4A8C62"}}>{tO}</div><div className="stat-lbl" style={{color:"#4A8C62"}}>OMAR</div></div>
         <div className="stat" style={{background:"#FEF6EF",border:"1px solid #FCE4D6"}}><div className="stat-val" style={{color:"#C67A3C"}}>{tE}</div><div className="stat-lbl" style={{color:"#C67A3C"}}>EMMA</div></div>
-        <div className="stat" style={{background:"#F5F5F5",border:"1px solid #E0E0E0"}}><div className="stat-val" style={{color:"#999"}}>{unal}</div><div className="stat-lbl" style={{color:"#999"}}>OPEN</div></div>
+        <div className="stat" style={{background:"#F5F5F5",border:"1px solid #E0E0E0"}}><div className="stat-val" style={{color:"#999"}}>{unal}</div><div className="stat-lbl" style={{color:"#999"}}>DEFAULT</div></div>
       </div>
     </div>
   );
@@ -538,13 +538,24 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
               </div>
             </div>
 
-            <button onClick={updateNights} className="btn" style={{marginBottom:8,fontSize:10}}>Calculate nights</button>
-
-            <div style={{display:"flex",gap:14,alignItems:"center",marginBottom:10,padding:"6px 10px",borderRadius:8,background:"#F8F9FB",border:"1px solid #E8E8E8"}}>
-              <div style={{textAlign:"center"}}><div style={{fontSize:18,fontWeight:800,color:"#4A8C62"}}>{dO||"\u2014"}</div><div style={{fontSize:8,color:"#4A8C62"}}>OMAR NIGHTS</div></div>
-              <div style={{textAlign:"center"}}><div style={{fontSize:18,fontWeight:800,color:"#C67A3C"}}>{dE||"\u2014"}</div><div style={{fontSize:8,color:"#C67A3C"}}>EMMA NIGHTS</div></div>
-              <div style={{flex:1,fontSize:10,color:"#888"}}>of {holiday.totalNights} total</div>
-            </div>
+            {function(){
+              var oN = calcNights(dOStart, dOEnd);
+              var eN = calcNights(dEStart, dEEnd);
+              var oDesc = dOStart && dOEnd ? fmtMed(dOStart) + " " + timeLabel(dOStartT) + " \u2192 " + fmtMed(dOEnd) + " " + timeLabel(dOEndT) : "";
+              var eDesc = dEStart && dEEnd ? fmtMed(dEStart) + " " + timeLabel(dEStartT) + " \u2192 " + fmtMed(dEEnd) + " " + timeLabel(dEEndT) : "";
+              // Store for submit
+              if (dOStart && dOEnd && dO !== String(oN)) { setTimeout(function(){setDO(String(oN));setDOD(oDesc);},0); }
+              if (dEStart && dEEnd && dE !== String(eN)) { setTimeout(function(){setDE(String(eN));setDED(eDesc);},0); }
+              return React.createElement("div", {style:{display:"flex",gap:14,alignItems:"center",marginBottom:10,padding:"6px 10px",borderRadius:8,background:"#F8F9FB",border:"1px solid #E8E8E8"}},
+                React.createElement("div", {style:{textAlign:"center"}}, React.createElement("div",{style:{fontSize:18,fontWeight:800,color:"#4A8C62"}},oN||"\u2014"), React.createElement("div",{style:{fontSize:8,color:"#4A8C62"}},"OMAR NIGHTS")),
+                React.createElement("div", {style:{textAlign:"center"}}, React.createElement("div",{style:{fontSize:18,fontWeight:800,color:"#C67A3C"}},eN||"\u2014"), React.createElement("div",{style:{fontSize:8,color:"#C67A3C"}},"EMMA NIGHTS")),
+                React.createElement("div", {style:{flex:1,fontSize:10,color:"#888"}}, "of " + holiday.totalNights + " total"),
+                oDesc && React.createElement("div",{style:{fontSize:9,color:"#888",textAlign:"right",lineHeight:1.4}},
+                  React.createElement("div",{style:{color:"#4A8C62"}},oDesc),
+                  eDesc && React.createElement("div",{style:{color:"#C67A3C"}},eDesc)
+                )
+              );
+            }()}
             <textarea value={dN} onChange={function(e){setDN(e.target.value);}} placeholder="Additional notes" className="text-input notes" />
             <div style={{display:"flex",gap:8,marginTop:10}}>
               <button className="btn primary" onClick={submit}>{myP?"Update":"Submit"} proposal</button>
@@ -1030,7 +1041,7 @@ function App() {
 
         {/* Regular weekly pattern note */}
         {tab!=="termdates" && <div style={{fontSize:9,color:"#1F4E79",padding:"5px 10px",borderRadius:6,background:"#DDEBF7",marginBottom:10,lineHeight:1.5}}>
-          <strong>Regular weekly pattern (term time):</strong> Mon/Tue/Thu nights = Emma · Wed night = Omar · Alternating weekends Fri 6pm–Sun 6pm. <strong>Holiday splits below cover school holidays and bank holidays only.</strong> The regular pattern applies at holiday boundaries.
+          <strong>Regular weekly pattern (term time):</strong> Mon/Tue/Thu nights = Emma \u00b7 Wed night = Omar \u00b7 Alternating weekends Fri 6pm\u2013Sun 6pm. This applies at holiday boundaries \u2014 e.g. Thu night at start of a holiday = Emma, Sun night at end = Emma.
         </div>}
 
         {/* Split summary */}
