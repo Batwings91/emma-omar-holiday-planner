@@ -57,6 +57,7 @@
   .term-row.holiday { background: #FFF2CC; border: 1px solid #E8C84A; }
   .term-row.term { background: #fff; border: 1px solid #E8E8E8; }
   .term-row.inset { background: #E2EFDA; border: 1px solid #A3C985; }
+  .term-row.event { background: #F0E6FF; border: 1px solid #C4A8E0; }
   .landing { display: flex; justify-content: center; align-items: center; min-height: 100vh; text-align: center; padding: 20px; }
   .who-btn { width: 140px; padding: 22px 0; border-radius: 14px; cursor: pointer; font-size: 16px; font-weight: 700; }
   .who-btn.omar { border: 2px solid #6BAF82; background: #F0FAF3; color: #4A8C62; }
@@ -160,7 +161,25 @@ const TERM_DATES = [
   {id:"t9",year:"2025/26",period:"Spring Term 2",start:"2026-02-23",end:"2026-03-27",type:"term"},
   {id:"t10",year:"2025/26",period:"Easter Holiday",start:"2026-03-30",end:"2026-04-10",type:"holiday"},
   {id:"t11",year:"2025/26",period:"Summer Term 1",start:"2026-04-13",end:"2026-05-22",type:"term"},
+  {id:"e1",year:"2025/26",period:"📋 Y4/5 Puberty Talks (school nurse)",start:"2026-04-17",end:"2026-04-17",type:"event"},
+  {id:"e2",year:"2025/26",period:"🏫 Bank Holiday — School Closed",start:"2026-05-04",end:"2026-05-04",type:"inset"},
+  {id:"e3",year:"2025/26",period:"📝 Y6 SATs Week",start:"2026-05-11",end:"2026-05-14",type:"event"},
+  {id:"e4",year:"2025/26",period:"🏕 Y5 Residential — Bowles",start:"2026-05-20",end:"2026-05-22",type:"event"},
   {id:"t12",year:"2025/26",period:"May Half Term",start:"2026-05-25",end:"2026-05-29",type:"holiday"},
+  {id:"e5",year:"2025/26",period:"🏃 Small Schools Athletics @ Norman Park",start:"2026-06-11",end:"2026-06-11",type:"event"},
+  {id:"e6",year:"2025/26",period:"🏕 Y6 PGL Residential — Grosvenor Hall",start:"2026-06-15",end:"2026-06-19",type:"event"},
+  {id:"e7",year:"2025/26",period:"🚌 Y1 Trip to London",start:"2026-06-18",end:"2026-06-18",type:"event"},
+  {id:"e8",year:"2025/26",period:"📸 Class Photographs (Van Cols)",start:"2026-06-25",end:"2026-06-25",type:"event"},
+  {id:"e9",year:"2025/26",period:"🏃 Y5 Aquinas Sports Day",start:"2026-06-25",end:"2026-06-25",type:"event"},
+  {id:"e10",year:"2025/26",period:"🎪 PTA Summer Fair 3.30–5.30pm",start:"2026-06-26",end:"2026-06-26",type:"event"},
+  {id:"e11",year:"2025/26",period:"🏅 Sports Day (am)",start:"2026-07-01",end:"2026-07-01",type:"event"},
+  {id:"e12",year:"2025/26",period:"🏅 Reserve Sports Day (am)",start:"2026-07-02",end:"2026-07-02",type:"event"},
+  {id:"e13",year:"2025/26",period:"🚌 Y3/4 Trip to Maidstone Museum",start:"2026-07-03",end:"2026-07-03",type:"event"},
+  {id:"e14",year:"2025/26",period:"🔄 Y6 Secondary School Transition Day",start:"2026-07-07",end:"2026-07-07",type:"event"},
+  {id:"e15",year:"2025/26",period:"🎭 Y5/6 Show — parents 1.45–2.45pm",start:"2026-07-08",end:"2026-07-08",type:"event"},
+  {id:"e16",year:"2025/26",period:"🎭 Y5/6 Show — parents 6.30–7.30pm",start:"2026-07-09",end:"2026-07-09",type:"event"},
+  {id:"e17",year:"2025/26",period:"⛪ Thanksgiving Service 2.30pm",start:"2026-07-13",end:"2026-07-13",type:"event"},
+  {id:"e18",year:"2025/26",period:"🏫 Last Day — 1.10pm finish + Y6 Leavers 9.30am",start:"2026-07-17",end:"2026-07-17",type:"event"},
   {id:"t13",year:"2025/26",period:"Summer Term 2",start:"2026-06-01",end:"2026-07-17",type:"term"},
   {id:"t14",year:"2025/26",period:"Inset Days (staff)",start:"2026-07-20",end:"2026-07-22",type:"inset"},
   {id:"t15",year:"2025/26",period:"Summer Holiday",start:"2026-07-23",end:"2026-08-31",type:"holiday"},
