@@ -58,13 +58,14 @@
   .term-row.term { background: #fff; border: 1px solid #E8E8E8; }
   .term-row.inset { background: #E2EFDA; border: 1px solid #A3C985; }
   .term-row.event { background: #F0E6FF; border: 1px solid #C4A8E0; }
-  .cal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
   .cal-month { background: #fff; border-radius: 10px; padding: 10px; border: 1px solid #E8E8E8; }
   .cal-month-title { font-size: 13px; font-weight: 700; color: #1F4E79; margin-bottom: 6px; text-align: center; }
   .cal-days-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; margin-bottom: 2px; }
   .cal-day-label { font-size: 9px; font-weight: 700; color: #AAA; text-align: center; padding: 2px 0; }
   .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
-  .cal-day { font-size: 10px; text-align: center; padding: 3px 0; border-radius: 3px; cursor: default; position: relative; }
+  .cal-day { font-size: 10px; text-align: center; padding: 4px 1px; border-radius: 3px; cursor: default; min-height: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .cal-day .cal-who { font-size: 7px; font-weight: 800; letter-spacing: 0.3px; line-height: 1; margin-top: 1px; }
   .cal-day.empty { }
   .cal-day.term { background: #F5F5F5; color: #999; }
   .cal-day.holiday { background: #FFF2CC; color: #7F5F00; }
@@ -178,12 +179,14 @@ const HOLIDAYS = [
   { id:"xmas25",year:"2025/26",name:"Christmas 2025",schoolHol:"Mon 22 Dec – Fri 2 Jan",termEnds:"Fri 19 Dec 1.10pm",schoolResumes:"Mon 5 Jan",availStart:"2025-12-19",availEnd:"2026-01-04",totalNights:16,keyDates:"Christmas Day 25 Dec",locked:true,agreed:{omar:5,emma:11,source:"Mediation OS JS2",omarDates:"Mon 22 Dec 6pm → Sat 27 Dec 11:30am",emmaDates:"Fri 19 Dec 1.10pm → Mon 22 Dec 6pm + Sat 27 Dec → Sun 4 Jan",notes:""}},
   { id:"febht26",year:"2025/26",name:"Feb Half Term 2026",schoolHol:"Mon 16 – Fri 20 Feb + Inset Fri 13",termEnds:"Thu 12 Feb (normal school day)",schoolResumes:"Mon 23 Feb",availStart:"2026-02-13",availEnd:"2026-02-22",totalNights:9,keyDates:"Inset Fri 13 Feb",locked:true,agreed:{omar:5,emma:4,source:"Agreed",omarDates:"Fri 13 Feb → Wed 18 Feb 6:45pm",emmaDates:"Wed 18 Feb 6:45pm → Sun 22 Feb",notes:""}},
   { id:"easter26",year:"2025/26",name:"Easter 2026",schoolHol:"Mon 30 Mar – Fri 10 Apr",termEnds:"Fri 27 Mar 1.10pm",schoolResumes:"Mon 13 Apr",availStart:"2026-03-27",availEnd:"2026-04-12",totalNights:16,keyDates:"Good Fri 3 Apr · Easter Mon 6 Apr",locked:true,agreed:{omar:9,emma:7,source:"Agreed per email",omarDates:"Fri 27 Mar 1.10pm → Fri 3 Apr 11am + Fri 10 Apr 6pm → Sun 12 Apr",emmaDates:"Fri 3 Apr 11am → Fri 10 Apr 6pm",notes:"Emma: \"this is my year for Easter as you had Christmas.\""}},
+  { id:"maybh26",year:"2025/26",name:"May Bank Holiday Weekend 2026",schoolHol:"Mon 4 May (Bank Holiday)",termEnds:"Fri 1 May (normal school day)",schoolResumes:"Tue 5 May",availStart:"2026-05-01",availEnd:"2026-05-04",totalNights:3,keyDates:"Bank Holiday Mon 4 May"},
   { id:"mayht26",year:"2025/26",name:"May Half Term 2026",schoolHol:"Mon 25 – Fri 29 May",termEnds:"Fri 22 May (normal school day)",schoolResumes:"Mon 1 Jun",availStart:"2026-05-22",availEnd:"2026-05-31",totalNights:9,keyDates:""},
   { id:"summer26",year:"2025/26",name:"Summer 2026",schoolHol:"From Mon 20 Jul (inset Mon–Wed)",termEnds:"Fri 17 Jul 1.10pm",schoolResumes:"~Sep 2026",availStart:"2026-07-17",availEnd:"2026-08-31",totalNights:45,keyDates:"Omar 27 Jul – 9 Aug agreed",partialAgreed:{omar:13,note:"Omar 27 Jul – 9 Aug agreed. Remaining ~32 nights to discuss.",omarDates:"Mon 27 Jul → Sat 9 Aug"}},
   { id:"autht2627",year:"2026/27",name:"Autumn Half Term 2026",schoolHol:"Mon 19 Oct – Fri 30 Oct",termEnds:"Fri 16 Oct (normal school day)",schoolResumes:"Mon 2 Nov",availStart:"2026-10-16",availEnd:"2026-11-01",totalNights:16,keyDates:""},
   { id:"xmas2627",year:"2026/27",name:"Christmas 2026/27",schoolHol:"Mon 21 Dec – Fri 1 Jan",termEnds:"Fri 18 Dec 1.10pm",schoolResumes:"Mon 4 Jan",availStart:"2026-12-18",availEnd:"2027-01-03",totalNights:16,keyDates:"Christmas Day 25 Dec"},
   { id:"febht27",year:"2026/27",name:"Feb Half Term 2027",schoolHol:"Mon 15 – Fri 19 Feb + Inset Fri 12",termEnds:"Thu 11 Feb (normal school day)",schoolResumes:"Mon 22 Feb",availStart:"2027-02-11",availEnd:"2027-02-21",totalNights:10,keyDates:"Inset Fri 12 Feb"},
   { id:"easter27",year:"2026/27",name:"Easter 2027",schoolHol:"Fri 26 Mar – Fri 9 Apr",termEnds:"Thu 25 Mar 1.10pm",schoolResumes:"Mon 12 Apr",availStart:"2027-03-25",availEnd:"2027-04-11",totalNights:17,keyDates:"Good Fri 26 Mar · Easter Mon 29 Mar"},
+  { id:"maybh27",year:"2026/27",name:"May Bank Holiday Weekend 2027",schoolHol:"Mon 3 May (Bank Holiday)",termEnds:"Fri 30 Apr (normal school day)",schoolResumes:"Tue 4 May",availStart:"2027-04-30",availEnd:"2027-05-03",totalNights:3,keyDates:"Bank Holiday Mon 3 May"},
   { id:"mayht27",year:"2026/27",name:"May/Jun Half Term 2027",schoolHol:"Mon 31 May – Fri 4 Jun",termEnds:"Fri 28 May (normal school day)",schoolResumes:"Mon 7 Jun",availStart:"2027-05-28",availEnd:"2027-06-06",totalNights:9,keyDates:""},
   { id:"summer27",year:"2026/27",name:"Summer 2027",schoolHol:"From ~Mon 26 Jul (inset TBC)",termEnds:"Fri 23 Jul 1.10pm",schoolResumes:"~Sep 2027",availStart:"2027-07-23",availEnd:"2027-08-31",totalNights:39,keyDates:""},
 ];
@@ -317,6 +320,34 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
   var [dO,setDO] = useState(""); var [dE,setDE] = useState("");
   var [dOD,setDOD] = useState(""); var [dED,setDED] = useState("");
   var [dN,setDN] = useState("");
+  var [dOStart,setDOStart] = useState(""); var [dOStartT,setDOStartT] = useState("18:00");
+  var [dOEnd,setDOEnd] = useState(""); var [dOEndT,setDOEndT] = useState("18:00");
+
+  function calcNights(startD, endD) {
+    if (!startD || !endD) return 0;
+    var s = new Date(startD+"T12:00:00"); var e = new Date(endD+"T12:00:00");
+    return Math.max(0, Math.round((e - s) / 86400000));
+  }
+  function updateFromDates(os, oe) {
+    var oN = calcNights(os, oe);
+    setDO(String(oN));
+    setDE(String(holiday.totalNights - oN));
+    setDOD(os && oe ? fmtMed(os) + " " + timeLabel(dOStartT) + " → " + fmtMed(oe) + " " + timeLabel(dOEndT) : "");
+    // Emma gets the remainder
+    if (os && oe) {
+      var emS = holiday.availStart < os ? holiday.availStart : oe;
+      var emE = oe < holiday.availEnd ? holiday.availEnd : os;
+      setDED(fmtMed(holiday.availStart) + " → " + fmtMed(os) + " + " + fmtMed(oe) + " → " + fmtMed(holiday.availEnd));
+    }
+  }
+  function timeLabel(t) {
+    if (!t) return "";
+    var parts = t.split(":"); var h = parseInt(parts[0]); var m = parts[1];
+    var ampm = h >= 12 ? "pm" : "am"; if (h > 12) h -= 12; if (h === 0) h = 12;
+    return h + (m !== "00" ? ":" + m : "") + ampm;
+  }
+  function handleOStartChange(v) { setDOStart(v); updateFromDates(v, dOEnd); }
+  function handleOEndChange(v) { setDOEnd(v); updateFromDates(dOStart, v); }
 
   var other = me==="omar"?"emma":"omar";
   var myP = data&&data.proposals&&data.proposals[me] ? data.proposals[me] : null;
@@ -442,22 +473,44 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
           <div style={{fontSize:11,fontWeight:700,color:"#1F4E79",marginBottom:12,textTransform:"uppercase"}}>
             {myP?"Update "+nm(me)+"'s proposal":otherP?nm(me)+"'s counter-proposal":nm(me)+"'s proposal"}
           </div>
-          <div style={{display:"flex",gap:12,alignItems:"flex-end",flexWrap:"wrap",marginBottom:10}}>
-            <div><label style={{fontSize:10,fontWeight:700,color:"#4A8C62",display:"block",marginBottom:4}}>OMAR NIGHTS</label>
-            <input type="number" min={0} max={holiday.totalNights} value={dO} onChange={function(e){setDO(e.target.value);}} className="night-input omar" /></div>
-            <div><label style={{fontSize:10,fontWeight:700,color:"#C67A3C",display:"block",marginBottom:4}}>EMMA NIGHTS</label>
-            <input type="number" min={0} max={holiday.totalNights} value={dE} onChange={function(e){setDE(e.target.value);}} className="night-input emma" /></div>
-            <span style={{fontSize:11,color:"#AAA",paddingBottom:8}}>of {holiday.totalNights}</span>
+          <div style={{fontSize:10,fontWeight:700,color:"#1F4E79",marginBottom:4}}>OMAR'S TIME</div>
+          <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",marginBottom:6}}>
+            <label style={{fontSize:10,color:"#888"}}>From</label>
+            <input type="date" value={dOStart} min={holiday.availStart} max={holiday.availEnd} onChange={function(e){handleOStartChange(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid #6BAF82",fontSize:11,fontFamily:"inherit"}} />
+            <select value={dOStartT} onChange={function(e){setDOStartT(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid #6BAF82",fontSize:11,fontFamily:"inherit"}}>
+              <option value="08:00">8am</option><option value="09:00">9am</option><option value="10:00">10am</option><option value="11:00">11am</option><option value="11:30">11:30am</option>
+              <option value="12:00">12pm</option><option value="13:10">1:10pm</option><option value="14:00">2pm</option><option value="15:00">3pm</option><option value="15:20">3:20pm</option>
+              <option value="16:00">4pm</option><option value="17:00">5pm</option><option value="18:00">6pm</option><option value="18:45">6:45pm</option><option value="19:00">7pm</option>
+            </select>
+            <label style={{fontSize:10,color:"#888"}}>To</label>
+            <input type="date" value={dOEnd} min={holiday.availStart} max={holiday.availEnd} onChange={function(e){handleOEndChange(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid #6BAF82",fontSize:11,fontFamily:"inherit"}} />
+            <select value={dOEndT} onChange={function(e){setDOEndT(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid #6BAF82",fontSize:11,fontFamily:"inherit"}}>
+              <option value="08:00">8am</option><option value="09:00">9am</option><option value="10:00">10am</option><option value="11:00">11am</option><option value="11:30">11:30am</option>
+              <option value="12:00">12pm</option><option value="13:10">1:10pm</option><option value="14:00">2pm</option><option value="15:00">3pm</option><option value="15:20">3:20pm</option>
+              <option value="16:00">4pm</option><option value="17:00">5pm</option><option value="18:00">6pm</option><option value="18:45">6:45pm</option><option value="19:00">7pm</option>
+            </select>
           </div>
-          <div style={{marginBottom:8}}>
-            <label style={{fontSize:10,fontWeight:700,color:"#4A8C62",display:"block",marginBottom:4}}>OMAR'S DATES & HANDOVER TIMES</label>
-            <input type="text" value={dOD} onChange={function(e){setDOD(e.target.value);}} placeholder="e.g. Fri 27 Mar 1.10pm → Wed 1 Apr 6pm" className="text-input omar" />
+          <div style={{display:"flex",gap:14,alignItems:"center",marginBottom:10,padding:"6px 10px",borderRadius:8,background:"#F0FAF3",border:"1px solid #C6EFCE"}}>
+            <div style={{textAlign:"center"}}><div style={{fontSize:18,fontWeight:800,color:"#4A8C62"}}>{dO||"—"}</div><div style={{fontSize:8,color:"#4A8C62"}}>OMAR NIGHTS</div></div>
+            <div style={{textAlign:"center"}}><div style={{fontSize:18,fontWeight:800,color:"#C67A3C"}}>{dE||"—"}</div><div style={{fontSize:8,color:"#C67A3C"}}>EMMA NIGHTS</div></div>
+            <div style={{flex:1,fontSize:10,color:"#888"}}>of {holiday.totalNights} total</div>
           </div>
-          <div style={{marginBottom:8}}>
-            <label style={{fontSize:10,fontWeight:700,color:"#C67A3C",display:"block",marginBottom:4}}>EMMA'S DATES & HANDOVER TIMES</label>
-            <input type="text" value={dED} onChange={function(e){setDED(e.target.value);}} placeholder="e.g. Wed 1 Apr 6pm → Sun 12 Apr" className="text-input emma" />
+          {dOD && <div style={{fontSize:11,color:"#4A8C62",marginBottom:4}}><strong>Omar:</strong> {dOD}</div>}
+          {dED && <div style={{fontSize:11,color:"#C67A3C",marginBottom:8}}><strong>Emma:</strong> {dED}</div>}
+          <div style={{fontSize:10,color:"#999",marginBottom:4}}>Or enter dates manually:</div>
+          <div style={{marginBottom:6}}>
+            <input type="text" value={dOD} onChange={function(e){setDOD(e.target.value);}} placeholder="Omar's dates & handover" className="text-input omar" />
           </div>
-          <textarea value={dN} onChange={function(e){setDN(e.target.value);}} placeholder="Additional notes — arrangements, handover details, etc." className="text-input notes" />
+          <div style={{marginBottom:6}}>
+            <input type="text" value={dED} onChange={function(e){setDED(e.target.value);}} placeholder="Emma's dates & handover" className="text-input emma" />
+          </div>
+          <div style={{display:"flex",gap:6,marginBottom:6}}>
+            <div><label style={{fontSize:10,fontWeight:700,color:"#4A8C62"}}>Omar nights</label>
+            <input type="number" min={0} max={holiday.totalNights} value={dO} onChange={function(e){setDO(e.target.value);setDE(String(holiday.totalNights-(parseInt(e.target.value)||0)));}} className="night-input omar" /></div>
+            <div><label style={{fontSize:10,fontWeight:700,color:"#C67A3C"}}>Emma nights</label>
+            <input type="number" min={0} max={holiday.totalNights} value={dE} onChange={function(e){setDE(e.target.value);setDO(String(holiday.totalNights-(parseInt(e.target.value)||0)));}} className="night-input emma" /></div>
+          </div>
+          <textarea value={dN} onChange={function(e){setDN(e.target.value);}} placeholder="Additional notes" className="text-input notes" />
           <div style={{display:"flex",gap:8,marginTop:10}}>
             <button className="btn primary" onClick={submit}>{myP?"Update":"Submit"} proposal</button>
             <button className="btn" onClick={function(){setDrafting(false);}}>Cancel</button>
@@ -472,175 +525,124 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
   );
 }
 
-function TermDatesPanel({termDates, onTermUpdate}) {
-  var [pdfText, setPdfText] = useState(null);
-  var [pdfLoading, setPdfLoading] = useState(false);
-  var [proposedChanges, setProposedChanges] = useState(null);
-  var [editIdx, setEditIdx] = useState(null);
-  var [editDraft, setEditDraft] = useState({});
+function TermDatesPanel({termDates, onTermUpdate, me}) {
+  var [editId, setEditId] = useState(null);
+  var [draft, setDraft] = useState({});
+  var [adding, setAdding] = useState(false);
   var years = ["2025/26","2026/27"];
 
-  async function handlePdfUpload(e) {
-    var file = e.target.files[0];
-    if (!file || !window.pdfjsLib) return;
-    setPdfLoading(true);
-    setProposedChanges(null);
-    try {
-      var arrayBuffer = await file.arrayBuffer();
-      var pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
-      var allText = "";
-      for (var i = 1; i <= pdf.numPages; i++) {
-        var page = await pdf.getPage(i);
-        var content = await page.getTextContent();
-        allText += content.items.map(function(item){return item.str;}).join(" ") + "\n";
-      }
-      setPdfText(allText);
-      // Parse and compare
-      var changes = parsePdfChanges(allText);
-      if (changes.length > 0) setProposedChanges(changes);
-    } catch(err) {
-      setPdfText("Error: " + err.message);
-    }
-    setPdfLoading(false);
+  function findNextDate() {
+    var future = termDates.filter(function(t){ return t.end >= TODAY; });
+    future.sort(function(a,b){ return a.start < b.start ? -1 : 1; });
+    return future.length > 0 ? future[0].id : null;
+  }
+  var nextId = findNextDate();
+
+  function saveEdit() {
+    var updated = termDates.map(function(t){
+      if (t.id !== editId) return t;
+      return Object.assign({}, draft, {lastModifiedBy: me ? nm(me) : "Unknown", lastModifiedAt: new Date().toISOString()});
+    });
+    onTermUpdate(updated);
+    setEditId(null);
   }
 
-  function parsePdfChanges(text) {
-    var changes = [];
-    var lines = text.split(/\n|(?=\b(?:Mon|Tue|Wed|Thur|Fri|Sat|Sun)\w*\s+\d)/i);
-    var months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,january:0,february:1,march:2,april:3,june:5,july:6,august:7,september:8,october:9,november:10,december:11};
-    // Detect current context month from section headers
-    var ctxMonth = -1; var ctxYear = 2026;
-    var keywords = [
-      {pat:/half\s*term/i, type:"holiday"},
-      {pat:/holiday/i, type:"holiday"},
-      {pat:/inset/i, type:"inset"},
-      {pat:/bank\s*holiday/i, type:"inset"},
-      {pat:/school\s*(start|open)/i, type:"term"},
-      {pat:/last\s*day/i, type:"term"},
-      {pat:/trip|residential|pgl|bowles/i, type:"event"},
-      {pat:/sports?\s*day/i, type:"event"},
-      {pat:/show|performance|concert|pantomime|panto/i, type:"event"},
-      {pat:/photograph/i, type:"event"},
-      {pat:/fair/i, type:"event"},
-      {pat:/sats/i, type:"event"},
-      {pat:/service|thanksgiving|leavers/i, type:"event"},
-    ];
-
-    for (var i = 0; i < lines.length; i++) {
-      var line = lines[i].trim();
-      if (!line || line.length < 3) continue;
-      // Detect month context
-      for (var mk in months) {
-        if (line.toLowerCase().indexOf(mk) === 0 && line.length < 15) { ctxMonth = months[mk]; }
-      }
-      // Look for date patterns
-      var dateMatch = line.match(/(\d{1,2})(?:st|nd|rd|th)/i);
-      if (!dateMatch) continue;
-      var day = parseInt(dateMatch[1]);
-      if (day < 1 || day > 31 || ctxMonth < 0) continue;
-      // Determine type
-      var detectedType = "event";
-      for (var k = 0; k < keywords.length; k++) {
-        if (keywords[k].pat.test(line)) { detectedType = keywords[k].type; break; }
-      }
-      var dateStr = ctxYear + "-" + String(ctxMonth+1).padStart(2,"0") + "-" + String(day).padStart(2,"0");
-      // Check end date
-      var endMatch = line.match(/[-–]\s*(?:Mon|Tue|Wed|Thur|Fri|Sat|Sun)\w*\s+(\d{1,2})(?:st|nd|rd|th)/i);
-      var endDateStr = endMatch ? ctxYear + "-" + String(ctxMonth+1).padStart(2,"0") + "-" + String(parseInt(endMatch[1])).padStart(2,"0") : dateStr;
-      // Clean up event name
-      var eventName = line.replace(/^(?:Mon|Tue|Wed|Thur|Fri|Sat|Sun)\w*\s+\d{1,2}(?:st|nd|rd|th)\s*/i, "")
-                         .replace(/^[-–]\s*(?:Mon|Tue|Wed|Thur|Fri|Sat|Sun)\w*\s+\d{1,2}(?:st|nd|rd|th)\s*/i, "")
-                         .replace(/^\s*[-–]\s*/, "").trim();
-      if (!eventName) eventName = line.substring(0, 60);
-      // Check if this matches an existing entry
-      var existingMatch = null;
-      for (var j = 0; j < termDates.length; j++) {
-        var td = termDates[j];
-        if (td.start === dateStr || (td.period.toLowerCase().indexOf(eventName.toLowerCase().substring(0,10)) >= 0 && td.start.substring(0,7) === dateStr.substring(0,7))) {
-          existingMatch = td;
-          break;
-        }
-      }
-      var status = existingMatch ? (existingMatch.start === dateStr && existingMatch.end === endDateStr ? "match" : "changed") : "new";
-      if (status !== "match") {
-        changes.push({ date: dateStr, endDate: endDateStr, name: eventName, type: detectedType, status: status, existing: existingMatch, line: line.substring(0,80) });
-      }
-    }
-    return changes;
+  function deleteEntry(id) {
+    if (!confirm("Delete this entry?")) return;
+    var updated = termDates.filter(function(t){ return t.id !== id; });
+    onTermUpdate(updated);
   }
 
-  function acceptChange(idx) {
-    var c = proposedChanges[idx];
-    if (onTermUpdate) {
-      var newId = "pdf_" + Date.now() + "_" + idx;
-      var newEntry = {id: newId, year: "2025/26", period: c.name, start: c.date, end: c.endDate, type: c.type};
-      onTermUpdate(termDates.concat([newEntry]));
-    }
-    setProposedChanges(proposedChanges.filter(function(_,i){return i!==idx;}));
+  function flagEntry(id) {
+    var note = prompt("What is incorrect about this date?");
+    if (!note) return;
+    var updated = termDates.map(function(t){
+      if (t.id !== id) return t;
+      return Object.assign({}, t, {flag: note, flaggedBy: me ? nm(me) : "Unknown", flaggedAt: new Date().toISOString()});
+    });
+    onTermUpdate(updated);
   }
 
-  function rejectChange(idx) {
-    setProposedChanges(proposedChanges.filter(function(_,i){return i!==idx;}));
+  function clearFlag(id) {
+    var updated = termDates.map(function(t){
+      if (t.id !== id) return t;
+      var c = Object.assign({}, t);
+      delete c.flag; delete c.flaggedBy; delete c.flaggedAt;
+      return c;
+    });
+    onTermUpdate(updated);
   }
 
-  return (
-    <div style={{background:"#fff",borderRadius:14,padding:16,border:"1px solid #E8E8E8"}}>
-      <h3 style={{fontSize:15,fontWeight:700,margin:"0 0 4px"}}>Keston CE Primary — Term Dates</h3>
-      <p style={{fontSize:11,color:"#AAA",margin:"0 0 2px"}}>Official school calendar dates. Verified from school documents only.</p>
-      <p style={{fontSize:10,color:"#4472C4",margin:"0 0 14px",fontStyle:"italic"}}>Sources: Dates for Diaries Keston 2025-2026 V4 · Term Dates 2025-2026 · Revised Term Dates 2026-2027 (Mrs Ardern, 9 Feb 2026)</p>
-      {years.map(function(y){return (
-        <div key={y} style={{marginBottom:16}}>
-          <div style={{fontSize:12,fontWeight:700,color:"#1F4E79",marginBottom:6,padding:"4px 8px",background:"#D6E4F0",borderRadius:6}}>{y}</div>
-          {termDates.filter(function(t){return t.year===y;}).map(function(t){return (
-            <div key={t.id} className={"term-row "+t.type}>
-              <span style={{fontSize:11,fontWeight:t.type==="holiday"?700:400,flex:"1 1 140px"}}>{t.period}</span>
-              <span style={{fontSize:10,color:"#888",whiteSpace:"nowrap"}}>{fmtShort(t.start)}{t.end&&t.end!==t.start?" → "+fmtShort(t.end):""}</span>
-            </div>
-          );})}
-        </div>
-      );})}
+  function addNew() {
+    var newEntry = Object.assign({}, draft, {
+      id: "custom_" + Date.now(),
+      lastModifiedBy: me ? nm(me) : "Unknown",
+      lastModifiedAt: new Date().toISOString()
+    });
+    onTermUpdate(termDates.concat([newEntry]));
+    setAdding(false);
+    setDraft({});
+  }
 
-      <div className="pdf-upload">
-        <div style={{fontSize:12,fontWeight:700,color:"#1F4E79",marginBottom:6}}>📄 Upload Keston Dates for Diaries</div>
-        <p style={{fontSize:11,color:"#888",margin:"0 0 8px"}}>Upload the latest PDF. Dates will be parsed and compared against the current calendar.</p>
-        <input type="file" accept=".pdf" onChange={handlePdfUpload} />
-        {pdfLoading && <p style={{fontSize:11,color:"#4472C4",marginTop:8}}>Reading and parsing PDF...</p>}
+  function renderEditForm(onSave, onCancel) {
+    return React.createElement("div", {style:{padding:10,marginBottom:4,borderRadius:8,background:"#FAFBFF",border:"1.5px solid #4472C4"}},
+      React.createElement("div", {style:{display:"flex",gap:8,flexWrap:"wrap",marginBottom:6}},
+        React.createElement("input", {value:draft.period||"", onChange:function(e){setDraft(Object.assign({},draft,{period:e.target.value}));}, placeholder:"Name/description", style:{flex:"1 1 140px",padding:"5px 8px",borderRadius:6,border:"1px solid #D6E4F0",fontSize:12,fontFamily:"inherit"}}),
+        React.createElement("select", {value:draft.type||"event", onChange:function(e){setDraft(Object.assign({},draft,{type:e.target.value}));}, style:{padding:"5px 8px",borderRadius:6,border:"1px solid #D6E4F0",fontSize:12,fontFamily:"inherit"}},
+          React.createElement("option",{value:"term"},"Term"),
+          React.createElement("option",{value:"holiday"},"Holiday"),
+          React.createElement("option",{value:"inset"},"Inset"),
+          React.createElement("option",{value:"event"},"Event")
+        )
+      ),
+      React.createElement("div", {style:{display:"flex",gap:8,flexWrap:"wrap",marginBottom:6}},
+        React.createElement("input", {type:"date", value:draft.start||"", onChange:function(e){setDraft(Object.assign({},draft,{start:e.target.value}));}, style:{padding:"5px 8px",borderRadius:6,border:"1px solid #D6E4F0",fontSize:12,fontFamily:"inherit"}}),
+        React.createElement("span", {style:{alignSelf:"center",color:"#CCC"}}, "\u2192"),
+        React.createElement("input", {type:"date", value:draft.end||"", onChange:function(e){setDraft(Object.assign({},draft,{end:e.target.value}));}, style:{padding:"5px 8px",borderRadius:6,border:"1px solid #D6E4F0",fontSize:12,fontFamily:"inherit"}}),
+        React.createElement("select", {value:draft.year||"2025/26", onChange:function(e){setDraft(Object.assign({},draft,{year:e.target.value}));}, style:{padding:"5px 8px",borderRadius:6,border:"1px solid #D6E4F0",fontSize:12,fontFamily:"inherit"}},
+          React.createElement("option",{value:"2025/26"},"2025/26"),
+          React.createElement("option",{value:"2026/27"},"2026/27")
+        )
+      ),
+      React.createElement("div", {style:{display:"flex",gap:6}},
+        React.createElement("button", {onClick:onSave, style:{padding:"5px 14px",borderRadius:6,fontSize:11,fontWeight:700,background:"#4472C4",color:"#fff",border:"none",cursor:"pointer"}}, "Save"),
+        React.createElement("button", {onClick:onCancel, style:{padding:"5px 10px",borderRadius:6,fontSize:11,background:"#fff",border:"1px solid #DDD",cursor:"pointer",color:"#888"}}, "Cancel")
+      )
+    );
+  }
 
-        {proposedChanges && proposedChanges.length > 0 && <div style={{marginTop:12}}>
-          <div style={{fontSize:12,fontWeight:700,color:"#C00",marginBottom:8}}>📋 {proposedChanges.length} proposed change{proposedChanges.length>1?"s":""} detected:</div>
-          {proposedChanges.map(function(c, idx) {
-            return <div key={idx} style={{padding:"8px 10px",marginBottom:6,borderRadius:8,background:c.status==="new"?"#E2EFDA":"#FFF2CC",border:"1px solid "+(c.status==="new"?"#A3C985":"#E8C84A")}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8}}>
-                <div style={{flex:1}}>
-                  <span className="badge" style={{background:c.status==="new"?"#70AD47":"#ED7D31",color:"#fff",marginRight:6}}>{c.status==="new"?"NEW":"CHANGED"}</span>
-                  <strong style={{fontSize:12}}>{c.name}</strong>
-                  <div style={{fontSize:10,color:"#888",marginTop:2}}>{fmtShort(c.date)}{c.endDate!==c.date?" → "+fmtShort(c.endDate):""} · Type: {c.type}</div>
-                  {c.existing && <div style={{fontSize:10,color:"#ED7D31",marginTop:2}}>Current: {c.existing.period} ({fmtShort(c.existing.start)} → {fmtShort(c.existing.end)})</div>}
-                  <div style={{fontSize:9,color:"#BBB",marginTop:2}}>Source: "{c.line}"</div>
-                </div>
-                <div style={{display:"flex",gap:4,flexShrink:0}}>
-                  <button onClick={function(){acceptChange(idx);}} style={{padding:"4px 10px",borderRadius:6,fontSize:10,fontWeight:700,background:"#70AD47",color:"#fff",border:"none",cursor:"pointer"}}>✓ Add</button>
-                  <button onClick={function(){rejectChange(idx);}} style={{padding:"4px 10px",borderRadius:6,fontSize:10,fontWeight:700,background:"#C00",color:"#fff",border:"none",cursor:"pointer"}}>✗ Skip</button>
-                </div>
-              </div>
-            </div>;
-          })}
-        </div>}
-
-        {proposedChanges && proposedChanges.length === 0 && pdfText && <div style={{marginTop:10,padding:"8px 10px",borderRadius:8,background:"#E2EFDA",border:"1px solid #A3C985",fontSize:11,color:"#375623"}}>✓ All detected dates match the current calendar. No changes needed.</div>}
-
-        {pdfText && <div style={{marginTop:10}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-            <span style={{fontSize:11,fontWeight:700,color:"#375623"}}>Raw extracted text:</span>
-            <button onClick={function(){navigator.clipboard.writeText(pdfText).then(function(){alert("Copied!");});}} style={{padding:"4px 12px",borderRadius:6,fontSize:11,fontWeight:700,background:"#4472C4",color:"#fff",border:"none",cursor:"pointer"}}>📋 Copy</button>
-          </div>
-          <div className="pdf-output">{pdfText}</div>
-          <div style={{marginTop:6,padding:"6px 10px",borderRadius:6,background:"#DDEBF7",fontSize:10,color:"#1F4E79"}}>
-            For complex changes, copy the text and paste into <a href="https://claude.ai" target="_blank" style={{color:"#4472C4"}}>Claude AI</a> for intelligent parsing.
-          </div>
-        </div>}
-      </div>
-    </div>
+  return React.createElement("div", {style:{background:"#fff",borderRadius:14,padding:16,border:"1px solid #E8E8E8"}},
+    React.createElement("h3", {style:{fontSize:15,fontWeight:700,margin:"0 0 4px"}}, "Keston CE Primary \u2014 Term Dates"),
+    React.createElement("p", {style:{fontSize:11,color:"#AAA",margin:"0 0 2px"}}, "Official school calendar dates. Verified from school documents only."),
+    React.createElement("p", {style:{fontSize:10,color:"#4472C4",margin:"0 0 10px",fontStyle:"italic"}}, "Sources: Dates for Diaries Keston 2025-2026 V4 \u00b7 Term Dates 2025-2026 \u00b7 Revised Term Dates 2026-2027 (Mrs Ardern, 9 Feb 2026)"),
+    React.createElement("p", {style:{fontSize:10,color:"#888",margin:"0 0 14px"}}, "\u26a0\ufe0f Flag a date if incorrect \u00b7 Click to edit \u00b7 Changes are shared and tracked."),
+    years.map(function(y){
+      return React.createElement("div", {key:y, style:{marginBottom:16}},
+        React.createElement("div", {style:{fontSize:12,fontWeight:700,color:"#1F4E79",marginBottom:6,padding:"4px 8px",background:"#D6E4F0",borderRadius:6}}, y),
+        termDates.filter(function(t){return t.year===y;}).sort(function(a,b){return a.start<b.start?-1:1;}).map(function(t){
+          var isPast = t.end < TODAY;
+          var isNext = t.id === nextId;
+          if (editId === t.id) return React.createElement("div",{key:t.id}, renderEditForm(saveEdit, function(){setEditId(null);}));
+          var tc2 = {holiday:"#FFF2CC",term:"#fff",inset:"#E2EFDA",event:"#F0E6FF"};
+          var tb3 = {holiday:"#E8C84A",term:"#E8E8E8",inset:"#A3C985",event:"#C4A8E0"};
+          return React.createElement("div", {key:t.id, style:{display:"flex",gap:4,padding:"6px 8px",marginBottom:2,borderRadius:6,background:tc2[t.type]||"#fff",border:"1px solid "+(tb3[t.type]||"#E8E8E8"),opacity:isPast?0.45:1,outline:isNext?"2px solid #4472C4":"none",outlineOffset:"-1px",alignItems:"center",flexWrap:"wrap"}},
+            isNext && React.createElement("span", {style:{fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:"#4472C4",color:"#fff",marginRight:4}}, "NEXT"),
+            React.createElement("span", {onClick:function(){setEditId(t.id);setDraft(Object.assign({},t));}, style:{fontSize:11,fontWeight:t.type==="holiday"?700:400,flex:"1 1 120px",cursor:"pointer",minWidth:0}}, t.period),
+            React.createElement("span", {style:{fontSize:10,color:"#888",whiteSpace:"nowrap"}}, fmtShort(t.start) + (t.end&&t.end!==t.start?" \u2192 "+fmtShort(t.end):"")),
+            t.flag && React.createElement("span", {style:{fontSize:9,color:"#C00",fontWeight:600,marginLeft:4}}, "\u26a0\ufe0f " + t.flag + " (" + (t.flaggedBy||"") + ")"),
+            t.flag && React.createElement("button", {onClick:function(){clearFlag(t.id);}, style:{fontSize:9,color:"#70AD47",background:"none",border:"none",cursor:"pointer",fontWeight:600}}, "\u2713 Resolve"),
+            t.lastModifiedBy && React.createElement("span", {style:{fontSize:8,color:"#BBB",marginLeft:4}}, "edited " + (t.lastModifiedBy||"")),
+            React.createElement("div", {style:{display:"flex",gap:2,flexShrink:0}},
+              React.createElement("button", {onClick:function(){flagEntry(t.id);}, title:"Flag as incorrect", style:{fontSize:10,padding:"2px 5px",borderRadius:4,background:"#FFF2CC",border:"1px solid #E8C84A",cursor:"pointer",color:"#7F5F00"}}, "\u26a0\ufe0f"),
+              React.createElement("button", {onClick:function(){setEditId(t.id);setDraft(Object.assign({},t));}, title:"Edit", style:{fontSize:10,padding:"2px 5px",borderRadius:4,background:"#DDEBF7",border:"1px solid #4472C480",cursor:"pointer",color:"#1F4E79"}}, "\u270f\ufe0f"),
+              React.createElement("button", {onClick:function(){deleteEntry(t.id);}, title:"Delete", style:{fontSize:10,padding:"2px 5px",borderRadius:4,background:"#FCE4D6",border:"1px solid #E8A66780",cursor:"pointer",color:"#C00"}}, "\u2715")
+            )
+          );
+        })
+      );
+    }),
+    adding && renderEditForm(addNew, function(){setAdding(false);setDraft({});}),
+    !adding && React.createElement("button", {onClick:function(){setAdding(true);setDraft({year:"2025/26",type:"event",start:"",end:"",period:""});}, style:{marginTop:8,padding:"7px 16px",borderRadius:8,fontSize:12,fontWeight:700,background:"#4472C4",color:"#fff",border:"none",cursor:"pointer"}}, "+ Add a date")
   );
 }
 
@@ -702,13 +704,14 @@ function CalendarView({allData, selectedHoliday}) {
     var sh = HOLIDAYS.find(function(h){return h.id === selectedHoliday;});
     if (sh) {
       selStart = sh.availStart; selEnd = sh.availEnd;
-      // Build set of months that overlap
-      var sd = new Date(sh.availStart+"T12:00:00");
-      var ed = new Date(sh.availEnd+"T12:00:00");
-      var cur = new Date(sd);
-      while (cur <= ed) {
-        selMonths[cur.getFullYear()+"-"+cur.getMonth()] = true;
-        cur.setMonth(cur.getMonth() + 1);
+      // Build set of months that overlap - iterate by year/month integers
+      var sdt = new Date(sh.availStart+"T12:00:00");
+      var edt = new Date(sh.availEnd+"T12:00:00");
+      var cY = sdt.getFullYear(), cM = sdt.getMonth();
+      var eY = edt.getFullYear(), eM = edt.getMonth();
+      while (cY < eY || (cY === eY && cM <= eM)) {
+        selMonths[cY+"-"+cM] = true;
+        cM++; if (cM > 11) { cM = 0; cY++; }
       }
     }
   }
@@ -730,7 +733,12 @@ function CalendarView({allData, selectedHoliday}) {
       var isToday = ds === TODAY;
       var isDimmed = selectedHoliday && !(ds >= selStart && ds <= selEnd);
       var cls = "cal-day " + info.type + (isToday ? " today" : "") + (isDimmed ? " dimmed" : "");
-      cells.push(React.createElement("div", {key:d, className:cls, title:info.tooltip}, d));
+      var whoLabel = null;
+      if (info.type === "omar" || info.type === "omar-wknd") whoLabel = "Omar";
+      else if (info.type === "emma" || info.type === "emma-wknd") whoLabel = "Emma";
+      var cellContent = [d];
+      if (whoLabel) cellContent.push(React.createElement("span", {key:"w", className:"cal-who"}, whoLabel));
+      cells.push(React.createElement("div", {key:d, className:cls, title:info.tooltip}, cellContent));
     }
     return React.createElement("div", {key:monthName, className:"cal-month"+(isSelectedMonth?" selected":"")},
       React.createElement("div", {className:"cal-month-title"}, monthName),
@@ -954,7 +962,7 @@ function App() {
         </div>}
 
         {/* Term Dates tab */}
-        {tab==="termdates" && <TermDatesPanel termDates={termDates} onTermUpdate={handleTermUpdate} />}
+        {tab==="termdates" && <TermDatesPanel termDates={termDates} onTermUpdate={handleTermUpdate} me={me} />}
 
         <div style={{marginTop:20,textAlign:"center",fontSize:10,color:"#CCC",lineHeight:1.6}}>
           <p>Term dates verified from Keston CE Primary school documents only.</p>
