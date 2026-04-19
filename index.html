@@ -331,16 +331,17 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
     var s = new Date(startD+"T12:00:00"); var e = new Date(endD+"T12:00:00");
     return Math.max(0, Math.round((e - s) / 86400000));
   }
-  function updateFromDates(os, oe) {
-    var oN = calcNights(os, oe);
-    setDO(String(oN));
-    setDE(String(holiday.totalNights - oN));
-    setDOD(os && oe ? fmtMed(os) + " " + timeLabel(dOStartT) + " → " + fmtMed(oe) + " " + timeLabel(dOEndT) : "");
-    // Emma gets the remainder
-    if (os && oe) {
-      var emS = holiday.availStart < os ? holiday.availStart : oe;
-      var emE = oe < holiday.availEnd ? holiday.availEnd : os;
-      setDED(fmtMed(holiday.availStart) + " → " + fmtMed(os) + " + " + fmtMed(oe) + " → " + fmtMed(holiday.availEnd));
+  function updateFromDates(ms, me2) {
+    var myN = calcNights(ms, me2);
+    var otherN = holiday.totalNights - myN;
+    var myDates = ms && me2 ? fmtMed(ms) + " " + timeLabel(dOStartT) + " \u2192 " + fmtMed(me2) + " " + timeLabel(dOEndT) : "";
+    var otherDates = ms && me2 ? fmtMed(holiday.availStart) + " \u2192 " + fmtMed(ms) + " + " + fmtMed(me2) + " \u2192 " + fmtMed(holiday.availEnd) : "";
+    if (me === "omar") {
+      setDO(String(myN)); setDE(String(otherN));
+      setDOD(myDates); setDED(otherDates);
+    } else {
+      setDE(String(myN)); setDO(String(otherN));
+      setDED(myDates); setDOD(otherDates);
     }
   }
   function timeLabel(t) {
@@ -491,18 +492,18 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
             </div>
           </div> : <div>
             <div style={{fontSize:10,color:"#888",marginBottom:10}}>Propose the full split — set dates for both Omar and Emma.</div>
-            <div style={{fontSize:10,fontWeight:700,color:"#1F4E79",marginBottom:4}}>OMAR'S TIME</div>
+            <div style={{fontSize:10,fontWeight:700,color:"#1F4E79",marginBottom:4}}>{nm(me).toUpperCase()+"'S DATES"}</div>
             <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap",marginBottom:6}}>
               <label style={{fontSize:10,color:"#888"}}>From</label>
-              <input type="date" value={dOStart} min={holiday.availStart} max={holiday.availEnd} onChange={function(e){handleOStartChange(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid #6BAF82",fontSize:11,fontFamily:"inherit"}} />
-              <select value={dOStartT} onChange={function(e){setDOStartT(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid #6BAF82",fontSize:11,fontFamily:"inherit"}}>
+              <input type="date" value={dOStart} min={holiday.availStart} max={holiday.availEnd} onChange={function(e){handleOStartChange(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid "+(me==="omar"?"#6BAF82":"#E8A667"),fontSize:11,fontFamily:"inherit"}} />
+              <select value={dOStartT} onChange={function(e){setDOStartT(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid "+(me==="omar"?"#6BAF82":"#E8A667"),fontSize:11,fontFamily:"inherit"}}>
                 <option value="08:00">8am</option><option value="09:00">9am</option><option value="10:00">10am</option><option value="11:00">11am</option><option value="11:30">11:30am</option>
                 <option value="12:00">12pm</option><option value="13:10">1:10pm</option><option value="14:00">2pm</option><option value="15:00">3pm</option><option value="15:20">3:20pm</option>
                 <option value="16:00">4pm</option><option value="17:00">5pm</option><option value="18:00">6pm</option><option value="18:45">6:45pm</option><option value="19:00">7pm</option>
               </select>
               <label style={{fontSize:10,color:"#888"}}>To</label>
-              <input type="date" value={dOEnd} min={holiday.availStart} max={holiday.availEnd} onChange={function(e){handleOEndChange(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid #6BAF82",fontSize:11,fontFamily:"inherit"}} />
-              <select value={dOEndT} onChange={function(e){setDOEndT(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid #6BAF82",fontSize:11,fontFamily:"inherit"}}>
+              <input type="date" value={dOEnd} min={holiday.availStart} max={holiday.availEnd} onChange={function(e){handleOEndChange(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid "+(me==="omar"?"#6BAF82":"#E8A667"),fontSize:11,fontFamily:"inherit"}} />
+              <select value={dOEndT} onChange={function(e){setDOEndT(e.target.value);}} style={{padding:"4px 6px",borderRadius:6,border:"1.5px solid "+(me==="omar"?"#6BAF82":"#E8A667"),fontSize:11,fontFamily:"inherit"}}>
                 <option value="08:00">8am</option><option value="09:00">9am</option><option value="10:00">10am</option><option value="11:00">11am</option><option value="11:30">11:30am</option>
                 <option value="12:00">12pm</option><option value="13:10">1:10pm</option><option value="14:00">2pm</option><option value="15:00">3pm</option><option value="15:20">3:20pm</option>
                 <option value="16:00">4pm</option><option value="17:00">5pm</option><option value="18:00">6pm</option><option value="18:45">6:45pm</option><option value="19:00">7pm</option>
