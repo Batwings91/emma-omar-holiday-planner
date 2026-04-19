@@ -196,7 +196,7 @@ const HOLIDAYS = [
 
 const EMMA_SEED = {
   autht2627:{omar:7,emma:9,notes:"1st week (19–25 Oct) Omar, 2nd week (26 Oct–1 Nov) Emma.",omarDates:"Fri 16 Oct PM → Fri 23 Oct",emmaDates:"Fri 23 Oct → Sun 1 Nov"},
-  xmas2627:{omar:7,emma:9,notes:"1st week (21–27 Dec) Emma, 2nd week (28 Dec–3 Jan) Omar.",omarDates:"Sat 27 Dec → Sun 3 Jan",emmaDates:"Fri 18 Dec 1.10pm → Sat 27 Dec"},
+  xmas2627:{omar:8,emma:8,notes:"Omar's alternating weekend (18-20 Dec) + 2nd week (28 Dec-3 Jan). Emma: 1st week (21-27 Dec) per her email.",omarDates:"Fri 18 Dec 1.10pm \u2192 Sun 20 Dec 6pm + Mon 28 Dec 6pm \u2192 Sun 3 Jan 6pm",emmaDates:"Sun 20 Dec 6pm \u2192 Mon 28 Dec 6pm"},
   febht27:{omar:6,emma:4,notes:"1st half (12–18 Feb 8am) Omar, 2nd half (19–22 Feb) Emma.",omarDates:"Thu 11 Feb PM → Wed 17 Feb",emmaDates:"Wed 18 Feb → Sun 21 Feb"},
   easter27:{omar:6,emma:9,notes:"1st half (26 Mar – 1 Apr) Omar, 2nd half (1 Apr – 9 Apr) Emma.",omarDates:"Thu 25 Mar 1.10pm → Wed 31 Mar",emmaDates:"Wed 31 Mar → Fri 9 Apr 6pm"},
   mayht27:{omar:4,emma:5,notes:"1st half (28 May – 2 Jun 6pm) Emma, 2nd half (2 Jun – 6 Jun 6pm) Omar.",omarDates:"Tue 2 Jun 6pm → Sun 6 Jun",emmaDates:"Fri 28 May PM → Tue 2 Jun 6pm"},
@@ -298,7 +298,7 @@ function ProposalBox({who,proposal,isMe,onAgree,onDelete}) {
     <div className={"proposal-box "+who}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
         <div style={{display:"flex",alignItems:"center",gap:6}}>
-          <span style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.8px",color:who==="omar"?"#4A8C62":"#C67A3C"}}>{nm(who)}'s proposal</span>
+          <span style={{fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.8px",padding:"2px 8px",borderRadius:6,background:who==="omar"?"#C6EFCE":"#FCE4D6",color:who==="omar"?"#4A8C62":"#C67A3C"}}>{nm(who)}'s proposal</span>
           {when && <span style={{fontSize:10,color:"#BBB"}}>{when}</span>}
         </div>
         {isMe && onDelete && <button className="withdraw-btn" onClick={onDelete}>✕ Withdraw</button>}
@@ -572,18 +572,18 @@ function TermDatesPanel({termDates, onTermUpdate, me, allData}) {
   var years = ["2025/26","2026/27"];
 
   function getHolidayAgreedStatus(termDate) {
-    if (termDate.type !== "holiday") return null;
+    if (termDate.type !== "holiday" && termDate.type !== "inset") return null;
     // Find matching HOLIDAYS entry by date overlap
     for (var i = 0; i < HOLIDAYS.length; i++) {
       var h = HOLIDAYS[i];
-      if (termDate.start >= h.availStart && termDate.start <= h.availEnd || termDate.end >= h.availStart && termDate.end <= h.availEnd || h.availStart >= termDate.start && h.availStart <= termDate.end) {
+      if ((termDate.start >= h.availStart && termDate.start <= h.availEnd) || (termDate.end >= h.availStart && termDate.end <= h.availEnd) || (h.availStart >= termDate.start && h.availStart <= termDate.end)) {
         var d = allData && allData[h.id];
         var agr = (d && d.agreement) || h.agreed;
         if (agr) return {agreed: true, name: h.name};
         return {agreed: false, name: h.name};
       }
     }
-    return {agreed: false, name: ""};
+    return null;
   }
 
   function findNextDate() {
@@ -696,7 +696,7 @@ function TermDatesPanel({termDates, onTermUpdate, me, allData}) {
           return React.createElement("div", {key:t.id, style:{display:"flex",gap:4,padding:"6px 8px",marginBottom:2,borderRadius:6,background:tc2[t.type]||"#fff",border:"1px solid "+(tb3[t.type]||"#E8E8E8"),opacity:isPast?0.45:1,outline:isNext?"2px solid #4472C4":"none",outlineOffset:"-1px",alignItems:"center",flexWrap:"wrap"}},
             isNext && React.createElement("span", {style:{fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:"#4472C4",color:"#fff",marginRight:4}}, "NEXT"),
             React.createElement("span", {onClick:function(){setEditId(t.id);setDraft(Object.assign({},t));}, style:{fontSize:11,fontWeight:t.type==="holiday"?700:400,cursor:"pointer",minWidth:0}}, t.period),
-            holStatus && React.createElement("span", {style:{fontSize:9,fontWeight:600,marginLeft:2,padding:"1px 5px",borderRadius:4,background:holStatus.agreed?"#C6EFCE":"#FCE4D6",color:holStatus.agreed?"#375623":"#C00"}}, holStatus.agreed?"\u2713 Agreed":"\u2717 Not agreed"),
+            holStatus && React.createElement("span", {style:{fontSize:9,fontWeight:600,marginLeft:2,padding:"1px 5px",borderRadius:4,background:holStatus.agreed?"#C6EFCE":"#FCE4D6",color:holStatus.agreed?"#375623":"#C00"}}, holStatus.agreed?"\u2713 Holiday split agreed":"\u2717 Holiday split not agreed"),
             React.createElement("span", {style:{flex:1}}),
             React.createElement("span", {style:{fontSize:10,color:"#888",whiteSpace:"nowrap"}}, fmtShort(t.start) + (t.end&&t.end!==t.start?" \u2192 "+fmtShort(t.end):"")),
             t.flag && React.createElement("span", {style:{fontSize:9,color:"#C00",fontWeight:600,marginLeft:4}}, "\u26a0\ufe0f " + t.flag + " (" + (t.flaggedBy||"") + ")"),
