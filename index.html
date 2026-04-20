@@ -347,13 +347,6 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
     var s = new Date(startD+"T12:00:00"); var e = new Date(endD+"T12:00:00");
     return Math.max(0, Math.round((e - s) / 86400000));
   }
-  function updateNights() {
-    var oN = calcNights(dOStart, dOEnd);
-    var eN = calcNights(dEStart, dEEnd);
-    setDO(String(oN)); setDE(String(eN));
-    setDOD(dOStart && dOEnd ? fmtMed(dOStart) + " " + timeLabel(dOStartT) + " \u2192 " + fmtMed(dOEnd) + " " + timeLabel(dOEndT) : "");
-    setDED(dEStart && dEEnd ? fmtMed(dEStart) + " " + timeLabel(dEStartT) + " \u2192 " + fmtMed(dEEnd) + " " + timeLabel(dEEndT) : "");
-  }
   function timeLabel(t) {
     if (!t) return "";
     var parts = t.split(":"); var h = parseInt(parts[0]); var m = parts[1];
@@ -386,11 +379,15 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
     setDN((myP&&myP.notes)||""); setDrafting(true);
   }
   function submit(){
-    var o=parseInt(dO)||0, e=parseInt(dE)||0;
-    var prop={omar:o,emma:e,notes:dN,omarDates:dOD,emmaDates:dED,timestamp:new Date().toISOString()};
+    // Compute fresh from pickers
+    var o = dOStart && dOEnd ? calcNights(dOStart, dOEnd) : (parseInt(dO)||0);
+    var e = dEStart && dEEnd ? calcNights(dEStart, dEEnd) : (parseInt(dE)||0);
+    var omarDesc = dOStart && dOEnd ? fmtMed(dOStart) + " " + timeLabel(dOStartT) + " \u2192 " + fmtMed(dOEnd) + " " + timeLabel(dOEndT) : dOD;
+    var emmaDesc = dEStart && dEEnd ? fmtMed(dEStart) + " " + timeLabel(dEStartT) + " \u2192 " + fmtMed(dEEnd) + " " + timeLabel(dEEndT) : dED;
+    var prop={omar:o,emma:e,notes:dN,omarDates:omarDesc,emmaDates:emmaDesc,timestamp:new Date().toISOString()};
     var np=Object.assign({},data&&data.proposals?data.proposals:{});np[me]=prop;
     var nd=Object.assign({},data,{proposals:np});
-    if(otherP&&otherP.omar===o&&otherP.emma===e){nd.agreement={omar:o,emma:e,source:nm(me)+" accepted "+nm(other)+"'s proposal",agreedAt:new Date().toISOString(),notes:dN||otherP.notes,omarDates:dOD||otherP.omarDates,emmaDates:dED||otherP.emmaDates};}
+    if(otherP&&otherP.omar===o&&otherP.emma===e){nd.agreement={omar:o,emma:e,source:nm(me)+" accepted "+nm(other)+"'s proposal",agreedAt:new Date().toISOString(),notes:dN||otherP.notes,omarDates:omarDesc||otherP.omarDates,emmaDates:emmaDesc||otherP.emmaDates};}
     onSave(holiday.id,nd);setDrafting(false);
   }
   function accept(){
@@ -552,15 +549,12 @@ function HolidayCard({holiday,me,data,onSave,isNext,onSelect,isSelected,isOpen,o
               var eN = calcNights(dEStart, dEEnd);
               var oDesc = dOStart && dOEnd ? fmtMed(dOStart) + " " + timeLabel(dOStartT) + " \u2192 " + fmtMed(dOEnd) + " " + timeLabel(dOEndT) : "";
               var eDesc = dEStart && dEEnd ? fmtMed(dEStart) + " " + timeLabel(dEStartT) + " \u2192 " + fmtMed(dEEnd) + " " + timeLabel(dEEndT) : "";
-              // Store for submit
-              if (dOStart && dOEnd && dO !== String(oN)) { setTimeout(function(){setDO(String(oN));setDOD(oDesc);},0); }
-              if (dEStart && dEEnd && dE !== String(eN)) { setTimeout(function(){setDE(String(eN));setDED(eDesc);},0); }
               return React.createElement("div", {style:{display:"flex",gap:14,alignItems:"center",marginBottom:10,padding:"6px 10px",borderRadius:8,background:"#F8F9FB",border:"1px solid #E8E8E8"}},
                 React.createElement("div", {style:{textAlign:"center"}}, React.createElement("div",{style:{fontSize:18,fontWeight:800,color:"#4A8C62"}},oN||"\u2014"), React.createElement("div",{style:{fontSize:8,color:"#4A8C62"}},"OMAR NIGHTS")),
                 React.createElement("div", {style:{textAlign:"center"}}, React.createElement("div",{style:{fontSize:18,fontWeight:800,color:"#C67A3C"}},eN||"\u2014"), React.createElement("div",{style:{fontSize:8,color:"#C67A3C"}},"EMMA NIGHTS")),
                 React.createElement("div", {style:{flex:1,fontSize:10,color:"#888"}}, "of " + holiday.totalNights + " total"),
-                oDesc && React.createElement("div",{style:{fontSize:9,color:"#888",textAlign:"right",lineHeight:1.4}},
-                  React.createElement("div",{style:{color:"#4A8C62"}},oDesc),
+                (oDesc||eDesc) && React.createElement("div",{style:{fontSize:9,color:"#888",textAlign:"right",lineHeight:1.4}},
+                  oDesc && React.createElement("div",{style:{color:"#4A8C62"}},oDesc),
                   eDesc && React.createElement("div",{style:{color:"#C67A3C"}},eDesc)
                 )
               );
@@ -687,7 +681,10 @@ function TermDatesPanel({termDates, onTermUpdate, me, allData}) {
   }
 
   return React.createElement("div", {style:{background:"#fff",borderRadius:14,padding:16,border:"1px solid #E8E8E8"}},
-    React.createElement("h3", {style:{fontSize:15,fontWeight:700,margin:"0 0 4px"}}, "Keston CE Primary \u2014 Term Dates"),
+    React.createElement("div", {style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}},
+      React.createElement("h3", {style:{fontSize:15,fontWeight:700,margin:0}}, "Keston CE Primary \u2014 Term Dates"),
+      !adding && React.createElement("button", {onClick:function(){setAdding(true);setDraft({year:"2025/26",type:"event",start:"",end:"",period:""});}, style:{padding:"5px 12px",borderRadius:6,fontSize:11,fontWeight:700,background:"#4472C4",color:"#fff",border:"none",cursor:"pointer"}}, "+ Add a date or event")
+    ),
     React.createElement("p", {style:{fontSize:11,color:"#AAA",margin:"0 0 2px"}}, "Official school calendar dates. Verified from school documents only."),
     React.createElement("p", {style:{fontSize:10,color:"#4472C4",margin:"0 0 10px",fontStyle:"italic"}}, "Sources: Dates for Diaries Keston 2025-2026 V4 \u00b7 Term Dates 2025-2026 \u00b7 Revised Term Dates 2026-2027 (Mrs Ardern, 9 Feb 2026)"),
     React.createElement("p", {style:{fontSize:10,color:"#888",margin:"0 0 10px"}}, "\u26a0\ufe0f Flag a date if incorrect \u00b7 Click to edit \u00b7 Changes are shared and tracked."),
@@ -699,7 +696,6 @@ function TermDatesPanel({termDates, onTermUpdate, me, allData}) {
         );
       })
     ),
-    !adding && React.createElement("button", {onClick:function(){setAdding(true);setDraft({year:"2025/26",type:"event",start:"",end:"",period:""});}, style:{marginBottom:12,padding:"7px 16px",borderRadius:8,fontSize:12,fontWeight:700,background:"#4472C4",color:"#fff",border:"none",cursor:"pointer"}}, "+ Add a date or event"),
     adding && renderEditForm(addNew, function(){setAdding(false);setDraft({});}),
     years.map(function(y){
       return React.createElement("div", {key:y, style:{marginBottom:16}},
