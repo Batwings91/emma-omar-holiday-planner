@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -122,14 +123,21 @@
 <div id="root"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 
 <!-- Firebase SDK -->
+
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
 <!-- PDF.js for text extraction -->
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
 <script>if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";</script>
 
 <script type="text/babel">
@@ -1015,8 +1023,8 @@ function App() {
         <h1>Joint Holiday Planner</h1>
 
         {/* View toggle */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-          <div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,gap:8,flexWrap:"wrap"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
             {/* Desktop mode: two tabs */}
             {viewMode==="desktop" && <div className="btn-group" style={{marginBottom:0}}>
               <button className={"btn"+(tab!=="termdates"?" active":"")} onClick={function(){setTab("holidays");}}>Holidays & Calendar</button>
@@ -1028,17 +1036,16 @@ function App() {
               <button className={"btn"+(tab==="calendar"?" active":"")} onClick={function(){setTab("calendar");}}>Calendar</button>
               <button className={"btn"+(tab==="termdates"?" active":"")} onClick={function(){setTab("termdates");}}>Term Dates</button>
             </div>}
+            {/* Year filter inline */}
+            {tab!=="termdates" && <div style={{display:"flex",gap:2,background:"#F0F0F0",borderRadius:6,padding:2}}>
+              {["all","2025/26","2026/27"].map(function(y){return <button key={y} onClick={function(){setFilter(y);}} style={{padding:"3px 8px",borderRadius:5,fontSize:10,fontWeight:600,border:"none",cursor:"pointer",background:filter===y?"#4472C4":"transparent",color:filter===y?"#fff":"#999"}}>{y==="all"?"All":y}</button>;})}
+            </div>}
           </div>
           <div style={{display:"flex",gap:2,background:"#E8E8E8",borderRadius:6,padding:2}}>
             <button onClick={function(){setViewMode("desktop");}} style={{padding:"3px 10px",borderRadius:5,fontSize:10,fontWeight:600,border:"none",cursor:"pointer",background:viewMode==="desktop"?"#fff":"transparent",color:viewMode==="desktop"?"#333":"#999"}}>⬛ Desktop</button>
             <button onClick={function(){setViewMode("mobile");}} style={{padding:"3px 10px",borderRadius:5,fontSize:10,fontWeight:600,border:"none",cursor:"pointer",background:viewMode==="mobile"?"#fff":"transparent",color:viewMode==="mobile"?"#333":"#999"}}>📱 Mobile</button>
           </div>
         </div>
-
-        {/* Year filter */}
-        {tab!=="termdates" && <div className="btn-group">
-          {["all","2025/26","2026/27"].map(function(y){return <button key={y} className={"btn"+(filter===y?" active":"")} onClick={function(){setFilter(y);}}>{y==="all"?"All":y}</button>;})}
-        </div>}
 
         {/* Regular weekly pattern note */}
         {tab!=="termdates" && <div style={{fontSize:9,color:"#1F4E79",padding:"5px 10px",borderRadius:6,background:"#DDEBF7",marginBottom:10,lineHeight:1.5}}>
@@ -1081,5 +1088,6 @@ function App() {
 
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
 </script>
+
 </body>
 </html>
